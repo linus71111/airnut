@@ -6,7 +6,7 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 
 ## Funktionen
 
-- **9 fertige Fallbeispiele** (Ertrinkungsunfall, Reanimation, Unterzuckerung, starke Blutung,
+- **10 fertige Fallbeispiele** (CPR-Standardablauf, Ertrinkungsunfall, Reanimation, Unterzuckerung, starke Blutung,
   Allergie, Wirbelsäule, Sonnenstich, Unterkühlung, Krampfanfall) – jeweils mit
   Lage zum Vorlesen, geheimer Mimen-Anleitung, Schminke/Requisiten, Vitalwerten und Checkliste.
 - **Patientenmonitor** mit Puls, SpO₂, Atemfrequenz, Blutdruck, Blutzucker, Temperatur,
@@ -20,6 +20,7 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 - **Bewertung**: Jede:r Zuschauer:in hakt die Checkliste ab (Punkte, „WICHTIG“-Punkte) und kann Feedback schreiben.
 - **Ergebnis**: Prozent, Note, vergessene wichtige Punkte, Balken pro Prüfpunkt, Feedback –
   und **Teilen** (z.B. in die WhatsApp-Gruppe).
+- **🎲 Zufallsfall** (Startseite und Menü, beachtet den Schwierigkeits-Filter, „Neu würfeln“ möglich).
 - **Schwierigkeit** leicht / mittel / schwer für jeden Fall, mit Filter auf der Startseite.
 - **Anleitung**: Rollen, Ablauf Schritt für Schritt, Nachbesprechung und Sicherheitsregeln.
 - **Helfer:innen mit eigener Akte**: Beim Start wählt man aus, wer hilft. Jede Person hat eine Akte mit allen
@@ -60,6 +61,10 @@ zusammen mit der Webseite aus dem Branch `Website_1_0`:
 
 Einmalig nötig: In GitHub unter **Settings → Pages** bei „Build and deployment“ die Quelle
 **„Deploy from a branch“**, Branch **`gh-pages`** und Ordner **`/ (root)`** wählen und speichern.
+
+**Link ändern:** Der Pfad kommt automatisch aus dem Repository-Namen. Wird das Repository z.B. in `dlrg-fallbeispiel`
+umbenannt, ist die App unter `https://linus71111.github.io/dlrg-fallbeispiel/app/` erreichbar. Mit eigener Domain
+(Datei `CNAME` im Branch `Website_1_0` und Eintrag unter Settings → Pages → Custom domain) liegt sie unter `https://<domain>/app/`.
 
 Für eine „echte“ App aus dem App Store braucht man einen Apple-Developer-Account (99 € pro Jahr) und EAS Build.
 

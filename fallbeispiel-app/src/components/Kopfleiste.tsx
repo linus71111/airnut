@@ -4,6 +4,7 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useStore } from '../lib/store';
+import { oeffneZufallsFall } from '../lib/zufall';
 import { macheStile, useFarben } from '../theme';
 
 /** Gut sichtbarer Zurück-Knopf. Ohne Vorgänger (z.B. nach Neuladen im Browser) geht es zur Startseite. */
@@ -25,7 +26,7 @@ export function ZurueckKnopf() {
 export function MenueKnopf() {
   const styles = useStyles();
   const [offen, setOffen] = useState(false);
-  const { personen } = useStore();
+  const { personen, faelle } = useStore();
   const insets = useSafeAreaInsets();
 
   const gehe = (ziel: Href) => {
@@ -57,6 +58,13 @@ export function MenueKnopf() {
               <Eintrag text="🏠  Fallbeispiele" onPress={() => gehe('/')} />
               <Eintrag text="📖  Anleitung" onPress={() => gehe('/anleitung')} />
               <Eintrag text="📋  Einsatz-Historie" onPress={() => gehe('/verlauf')} />
+              <Eintrag
+                text="🎲  Zufallsfall"
+                onPress={() => {
+                  setOffen(false);
+                  oeffneZufallsFall(faelle);
+                }}
+              />
               <Eintrag text="➕  Eigener Fall" onPress={() => gehe('/editor')} />
               <Eintrag text="⚙️  Einstellungen" onPress={() => gehe('/einstellungen')} />
 

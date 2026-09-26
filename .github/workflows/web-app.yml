@@ -1,6 +1,8 @@
 # Veröffentlicht die Webseite (Branch Website_1_0) und die Fallbeispiel-App zusammen auf GitHub Pages:
-#   Webseite: https://linus71111.github.io/airnut/
-#   App:      https://linus71111.github.io/airnut/app/  (iPhone: in Safari öffnen → "Zum Home-Bildschirm")
+#   Webseite: https://<name>.github.io/<repository>/
+#   App:      https://<name>.github.io/<repository>/app/  (iPhone: in Safari öffnen → "Zum Home-Bildschirm")
+# Der Pfad wird automatisch aus dem Repository-Namen gebildet – nach dem Umbenennen passt er sich von selbst an.
+# Mit eigener Domain (Datei CNAME, siehe unten) liegt die App direkt unter https://<domain>/app/.
 # Einmalig in GitHub: Settings → Pages → "Deploy from a branch" → gh-pages / (root).
 name: Web-App veröffentlichen
 
@@ -43,12 +45,24 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm ci
 
-      - name: Unterordner /airnut/app für GitHub Pages einstellen
+      - name: Pfad der App bestimmen
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          OWNER="${{ github.repository_owner }}"
+          if [ -f ../webseite/CNAME ] || [ "$REPO" = "$OWNER.github.io" ]; then
+            BASIS="/app"          # eigene Domain oder <name>.github.io-Repository
+          else
+            BASIS="/$REPO/app"    # normales Projekt-Repository
+          fi
+          echo "BASIS=$BASIS" >> "$GITHUB_ENV"
+          echo "App-Pfad: $BASIS"
+
+      - name: Unterordner für GitHub Pages einstellen
         run: |
           node -e '
             const fs = require("fs");
             const a = JSON.parse(fs.readFileSync("app.json"));
-            a.expo.experiments = { ...a.expo.experiments, baseUrl: "/airnut/app" };
+            a.expo.experiments = { ...a.expo.experiments, baseUrl: process.env.BASIS };
             fs.writeFileSync("app.json", JSON.stringify(a, null, 2));
           '
 
@@ -56,7 +70,7 @@ jobs:
         run: npx expo export --platform web --output-dir dist
 
       - name: Als installierbare Web-App vorbereiten
-        run: node scripts/pwa.mjs dist /airnut/app
+        run: node scripts/pwa.mjs dist "$BASIS"
 
       - name: Webseite und App zusammenstellen
         working-directory: .

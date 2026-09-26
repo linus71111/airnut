@@ -7,6 +7,7 @@ import { Badge, Knopf, SchwierigkeitBadge } from '../components/ui';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import type { Schwierigkeit } from '../lib/types';
 import { useStore } from '../lib/store';
+import { oeffneZufallsFall } from '../lib/zufall';
 import { abstand, macheStile, useFarben } from '../theme';
 
 export default function Start() {
@@ -73,6 +74,13 @@ export default function Start() {
               />
             ))}
           </View>
+
+          <Knopf
+            titel={`🎲 Zufallsfall${stufe ? ` (${SCHWIERIGKEIT_INFO[stufe].label})` : ''}`}
+            art="sekundaer"
+            onPress={() => oeffneZufallsFall(faelle, stufe ?? undefined)}
+            stil={{ marginBottom: abstand.m }}
+          />
         </View>
       }
       renderItem={({ item }) => (

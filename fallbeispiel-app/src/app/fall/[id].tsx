@@ -8,13 +8,15 @@ import { Absatz, Badge, Eingabe, Karte, Knopf, SchwierigkeitBadge, Ueberschrift 
 import { bestaetigen } from '../../lib/bestaetigen';
 import { neueId } from '../../lib/score';
 import { useStore } from '../../lib/store';
+import type { Schwierigkeit } from '../../lib/types';
+import { oeffneZufallsFall } from '../../lib/zufall';
 import { abstand, macheStile, useFarben } from '../../theme';
 
 export default function FallDetail() {
   const styles = useStyles();
   const farben = useFarben();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { fall, speichereDurchgang, loescheFall, personen, speicherePerson } = useStore();
+  const { id, zufall, stufe } = useLocalSearchParams<{ id: string; zufall?: string; stufe?: Schwierigkeit }>();
+  const { fall, faelle, speichereDurchgang, loescheFall, personen, speicherePerson } = useStore();
   const f = fall(id);
   const [team, setTeam] = useState('');
   const [helfer, setHelfer] = useState<string[]>([]);
@@ -61,6 +63,14 @@ export default function FallDetail() {
   return (
     <ScrollView contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}>
       <Stack.Screen options={{ title: 'Fallbeispiel' }} />
+      {zufall && (
+        <View style={styles.zufall}>
+          <Text style={styles.zufallText}>🎲 Zufällig ausgewählt</Text>
+          <Pressable onPress={() => oeffneZufallsFall(faelle, stufe, true)} hitSlop={8} accessibilityRole="button">
+            <Text style={styles.zufallKnopf}>Neu würfeln</Text>
+          </Pressable>
+        </View>
+      )}
       <Text style={styles.titel}>{f.titel}</Text>
       <View style={{ flexDirection: 'row', marginTop: -abstand.s, marginBottom: abstand.m }}>
         <SchwierigkeitBadge stufe={f.schwierigkeit} />
@@ -195,6 +205,18 @@ const useStyles = macheStile((farben) => ({
   punkt: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, paddingVertical: 4 },
   punktText: { flex: 1, fontSize: 15, lineHeight: 21, color: farben.text },
   durchgestrichen: { textDecorationLine: 'line-through' },
+  zufall: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: farben.gelb,
+    borderRadius: 12,
+    paddingHorizontal: abstand.m,
+    paddingVertical: 10,
+    marginBottom: abstand.m,
+  },
+  zufallText: { color: farben.aufGelb, fontWeight: '800', fontSize: 15 },
+  zufallKnopf: { color: farben.rotAufGelb, fontWeight: '900', fontSize: 15 },
   alleAn: { color: farben.rot, fontWeight: '800' },
   label: { fontSize: 13, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },

@@ -35,6 +35,45 @@ const ENDE: Punkt[] = [
 
 export const STANDARD_FAELLE: Fallbeispiel[] = [
   {
+    id: 'cpr-standard',
+    schwierigkeit: 'mittel',
+    titel: 'CPR – Reanimation Standardablauf',
+    kurz: 'Person bricht zusammen und atmet nicht normal – Wiederbelebung Schritt für Schritt.',
+    lage:
+      'Auf dem Vereinsgelände bricht ein Mann plötzlich zusammen und bleibt reglos auf dem Boden liegen. Außer euch ist nur eine weitere Person in der Nähe.',
+    mimeAnleitung:
+      'Achtung: Herzdruckmassage und Beatmung nur an der Übungspuppe! Die Mimin/der Mime liegt nur bis zur Atemkontrolle da: keine Reaktion, keine normale Atmung (höchstens einzelne Schnappatmung). Danach wird an der Puppe weitergemacht. Eine zweite Person spielt den Passanten, der auf Anweisung den Notruf wählt oder den AED holt. Nach ca. 4–6 Minuten trifft der „Rettungsdienst“ ein und übernimmt.',
+    requisiten: 'Reanimationspuppe, Trainings-AED, Beatmungstuch oder -maske, Handschuhe, Handy für den Notruf.',
+    vitalStart: werte({
+      puls: 0,
+      atemfrequenz: 0,
+      rrSys: 0,
+      rrDia: 0,
+      spo2: 0,
+      bewusstsein: 'bewusstlos',
+      haut: 'blass-grau, Lippen blau',
+      pupillen: 'weit, reagieren nicht auf Licht',
+    }),
+    checkliste: liste('cpr', [
+      ['Umgebung auf Gefahren geprüft (Eigenschutz)', 'Eigenschutz', 2, true],
+      ['Bewusstsein geprüft: laut angesprochen, an den Schultern gerüttelt', 'Erstkontakt', 1, true],
+      ['Laut um Hilfe gerufen', 'Notruf'],
+      ['Atemwege frei gemacht: Kopf überstreckt, Kinn angehoben', 'Maßnahmen', 2, true],
+      ['Atmung geprüft (Sehen – Hören – Fühlen, höchstens 10 Sekunden), Schnappatmung als „nicht normal“ erkannt', 'Maßnahmen', 2, true],
+      ['Notruf 112 abgesetzt oder gezielt veranlasst (Handy auf Lautsprecher)', 'Notruf', 2, true],
+      ['AED gezielt holen lassen', 'Notruf', 2, true],
+      ['Oberkörper frei gemacht, Druckpunkt in der Mitte des Brustkorbs', 'Maßnahmen'],
+      ['30 Herzdruckmassagen: 5–6 cm tief, 100–120 pro Minute', 'Maßnahmen', 3, true],
+      ['Arme gestreckt, Brustkorb vollständig entlastet, Pausen unter 10 Sekunden', 'Maßnahmen', 2],
+      ['2 Beatmungen, Brustkorb hebt sich sichtbar (oder durchgehende Herzdruckmassage)', 'Maßnahmen', 2],
+      ['AED sofort eingeschaltet, Elektroden richtig aufgeklebt, Anweisungen befolgt', 'Maßnahmen', 3, true],
+      ['Bei Analyse und Schock berührt niemand die Person („Alle weg!“)', 'Maßnahmen', 2, true],
+      ['Nach dem Schock sofort mit der Herzdruckmassage weitergemacht', 'Maßnahmen', 2],
+      ['Helferwechsel etwa alle 2 Minuten ohne lange Pause', 'Maßnahmen'],
+      ['Übergabe an den Rettungsdienst (Was ist passiert? Was wurde gemacht? Wie viele Schocks?)', 'Übergabe'],
+    ]),
+  },
+  {
     id: 'ertrinken-bewusstlos',
     schwierigkeit: 'mittel',
     titel: 'Ertrinkungsunfall – bewusstlos mit Atmung',
