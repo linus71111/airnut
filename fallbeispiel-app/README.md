@@ -31,7 +31,19 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 
 > ⚠️ Die Inhalte sind Übungsmaterial. Bitte vor dem Einsatz mit euren Ausbilder:innen abstimmen.
 
-## Auf dem Handy testen
+## App auf das Handy laden (Android)
+
+Bei jeder Änderung an der App baut GitHub automatisch eine neue **APK-Datei** (Workflow `.github/workflows/android-apk.yml`).
+
+1. Auf dem Handy öffnen: **https://github.com/linus71111/airnut/releases/latest**
+2. `DLRG-Fallbeispiel.apk` antippen und herunterladen.
+3. Datei öffnen → dem Browser erlauben, Apps zu installieren → „Installieren“.
+   Wenn Google Play Protect warnt: „Trotzdem installieren“ (die App ist nicht aus dem Play Store, deshalb die Warnung).
+
+**iPhone:** Apple erlaubt das Installieren von Dateien wie einer APK nicht. Zum Testen Expo Go nutzen (siehe unten).
+Für eine richtige iPhone-App braucht man einen Apple-Developer-Account (99 € pro Jahr) und EAS Build.
+
+## Auf dem Handy testen (mit Expo Go)
 
 Du brauchst einen Computer (Windows, Mac oder Linux) und dein Handy im **selben WLAN**.
 

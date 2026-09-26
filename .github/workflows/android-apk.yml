@@ -1,0 +1,77 @@
+# Baut die Fallbeispiel-App als Android-APK und stellt sie als GitHub-Release zum Download bereit.
+name: Android-APK bauen
+
+on:
+  push:
+    branches: [claude/fallball-app-dlrg-bdf20o]
+    paths:
+      - 'fallbeispiel-app/**'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: fallbeispiel-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: fallbeispiel-app/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Android-Projekt erzeugen
+        run: npx expo prebuild --platform android --no-install
+
+      - name: APK bauen
+        working-directory: fallbeispiel-app/android
+        run: >
+          ./gradlew assembleRelease --no-daemon
+          -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
+          -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+
+      - name: APK umbenennen
+        run: cp android/app/build/outputs/apk/release/app-release.apk ../DLRG-Fallbeispiel.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DLRG-Fallbeispiel-apk
+          path: DLRG-Fallbeispiel.apk
+
+      - name: Als Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: DLRG Fallbeispiel – Android-App (Build ${{ github.run_number }})
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          files: DLRG-Fallbeispiel.apk
+          body: |
+            **Installation auf dem Android-Handy:**
+            1. `DLRG-Fallbeispiel.apk` unten antippen und herunterladen.
+            2. Die Datei öffnen. Beim ersten Mal fragt Android, ob der Browser Apps installieren darf → erlauben.
+            3. „Installieren“ tippen. Falls Google Play Protect warnt: „Trotzdem installieren“.
+
+            Neue Version? Einfach die neue APK installieren – die Daten bleiben erhalten.
