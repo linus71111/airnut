@@ -79,6 +79,12 @@ export default function EinstellungenSeite() {
           wert={e.messenModus}
           onChange={(v) => setze({ messenModus: v })}
         />
+        <Schalter
+          titel="Werte im Einsatz ändern"
+          text="Aus: Die Vitalwerte bleiben fest und werden nur angesagt. An: Die Spielleitung kann sie mit + / – und „Nach Behandlung“ verändern."
+          wert={e.werteAendern}
+          onChange={(v) => setze({ werteAendern: v })}
+        />
         <Text style={styles.label}>Zeitlimit mit Signalton</Text>
         <View style={styles.chips}>
           {ZEITLIMITS.map((m) => (

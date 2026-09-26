@@ -1,7 +1,7 @@
 # DLRG Fallbeispiel-App 🛟
 
 App für Android und iOS für das Jugend-Einsatz-Team: Fallbeispiele (realistische Notfälle)
-werden in echt nachgespielt, die Spielleitung steuert live die **Vitalwerte** und die
+werden in echt nachgespielt, die Spielleitung sagt die **Vitalwerte** an und die
 Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht haben.
 
 ## Funktionen
@@ -12,7 +12,8 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
   Lage zum Vorlesen, geheimer Mimen-Anleitung, Schminke/Requisiten, Vitalwerten und Checkliste.
 - **Patientenmonitor** mit Puls, SpO₂, Atemfrequenz, Blutdruck, Blutzucker, Temperatur,
   Bewusstsein, Haut und Pupillen. Werte außerhalb des Normbereichs werden rot markiert.
-  - Spielleitung ändert Werte live mit **+ / –** oder schaltet auf „Nach Behandlung“ um.
+  - Die Werte bleiben während der Übung fest und werden angesagt. Optional (Einstellungen → „Werte im Einsatz ändern“)
+    kann die Spielleitung sie mit **+ / –** oder „Nach Behandlung“ verändern.
   - **Messen-Modus**: Werte sind verdeckt und erscheinen erst, wenn die Helfer:innen sie
     „messen“ (antippen) – so muss man wirklich nachfragen/messen.
 - **Timer** für den Durchgang, Bildschirm bleibt dabei an.

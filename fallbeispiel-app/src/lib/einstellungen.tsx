@@ -22,6 +22,8 @@ export type Einstellungen = {
   vibration: boolean;
   /** Messen-Modus bei jedem neuen Durchgang automatisch einschalten */
   messenModus: boolean;
+  /** Vitalwerte während der Übung mit + / – und „Nach Behandlung“ veränderbar (Standard: aus, Werte bleiben fest) */
+  werteAendern: boolean;
   /** Nach so vielen Minuten ertönt ein Signal (0 = aus) */
   zeitlimit: number;
 };
@@ -34,6 +36,7 @@ export const STANDARD_EINSTELLUNGEN: Einstellungen = {
   klickton: false,
   vibration: true,
   messenModus: false,
+  werteAendern: false,
   zeitlimit: 0,
 };
 

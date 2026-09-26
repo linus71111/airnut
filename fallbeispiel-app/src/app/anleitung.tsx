@@ -7,7 +7,7 @@ import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import { abstand, macheStile, useFarben } from '../theme';
 
 const ROLLEN: [string, string][] = [
-  ['Spielleitung', 'Hat das Handy mit der App, liest die Lage vor, steuert die Vitalwerte und achtet auf die Sicherheit.'],
+  ['Spielleitung', 'Hat das Handy mit der App, liest die Lage vor, sagt die Vitalwerte an und achtet auf die Sicherheit.'],
   ['Mime (Patient:in)', 'Spielt die verletzte oder kranke Person. Kennt die geheime Mimen-Anleitung und bleibt in der Rolle.'],
   ['Helfer:innen', 'Das Team, das übt (meist 2–3 Personen). Kennt den Fall vorher nicht.'],
   ['Zuschauer:innen', 'Beobachten genau und bewerten danach mit der Checkliste. Sie sagen während der Übung nichts.'],
@@ -29,8 +29,8 @@ const ABLAUF: [string, string][] = [
     'Die Helfer:innen handeln wie im Ernstfall. Fragen sie nach einem Wert („Wie ist der Puls?“) oder messen ihn, zeigt oder sagt die Spielleitung den Wert aus der App. Im Messen-Modus tippt ihr die Kachel erst an, wenn wirklich gemessen wurde.',
   ],
   [
-    'Werte anpassen',
-    'Machen die Helfer:innen das Richtige, verbessern sich die Werte (Knopf „Nach Behandlung“ oder + / –). Passiert nichts, verschlechtern sich die Werte.',
+    'Werte ansagen',
+    'Die Vitalwerte bleiben während der Übung fest. Die Spielleitung sagt sie an, sobald die Helfer:innen fragen oder messen. Wer die Werte während der Übung verändern möchte, schaltet das in den Einstellungen ein („Werte im Einsatz ändern“).',
   ],
   ['Übung beenden', 'Nach der Übergabe an den „Rettungsdienst“ oder nach etwa 10–15 Minuten auf „Übung beenden“ drücken.'],
   ['Bewerten', 'Jede:r Zuschauer:in füllt die Checkliste aus. Das Handy wird dazu weitergegeben.'],

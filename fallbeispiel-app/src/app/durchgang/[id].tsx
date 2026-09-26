@@ -137,9 +137,9 @@ export default function DurchgangScreen() {
                 <Umschalter value={verdeckt} onValueChange={setVerdeckt} />
               </View>
 
-              <VitalMonitor werte={werte} onChange={setWerte} verdeckt={verdeckt} mitTon />
+              <VitalMonitor werte={werte} onChange={einstellungen.werteAendern ? setWerte : undefined} verdeckt={verdeckt} mitTon />
 
-              {f && (
+              {f && einstellungen.werteAendern && (
                 <View style={styles.knoepfe}>
                   <Knopf titel="Ausgangswerte" art="sekundaer" onPress={() => setWerte(f.vitalStart)} stil={{ flex: 1 }} />
                   {f.vitalNachBehandlung && (
