@@ -1,5 +1,7 @@
-# Veröffentlicht die Fallbeispiel-App als Web-App auf GitHub Pages:
-# https://linus71111.github.io/airnut/ – auf dem iPhone in Safari öffnen und "Zum Home-Bildschirm" wählen.
+# Veröffentlicht die Webseite (Branch Website_1_0) und die Fallbeispiel-App zusammen auf GitHub Pages:
+#   Webseite: https://linus71111.github.io/airnut/
+#   App:      https://linus71111.github.io/airnut/app/  (iPhone: in Safari öffnen → "Zum Home-Bildschirm")
+# Einmalig in GitHub: Settings → Pages → "Deploy from a branch" → gh-pages / (root).
 name: Web-App veröffentlichen
 
 on:
@@ -26,6 +28,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Webseite holen (Branch Website_1_0)
+        uses: actions/checkout@v4
+        with:
+          ref: Website_1_0
+          path: webseite
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -35,12 +43,12 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm ci
 
-      - name: Unterordner /airnut für GitHub Pages einstellen
+      - name: Unterordner /airnut/app für GitHub Pages einstellen
         run: |
           node -e '
             const fs = require("fs");
             const a = JSON.parse(fs.readFileSync("app.json"));
-            a.expo.experiments = { ...a.expo.experiments, baseUrl: "/airnut" };
+            a.expo.experiments = { ...a.expo.experiments, baseUrl: "/airnut/app" };
             fs.writeFileSync("app.json", JSON.stringify(a, null, 2));
           '
 
@@ -48,12 +56,22 @@ jobs:
         run: npx expo export --platform web --output-dir dist
 
       - name: Als installierbare Web-App vorbereiten
-        run: node scripts/pwa.mjs dist /airnut
+        run: node scripts/pwa.mjs dist /airnut/app
+
+      - name: Webseite und App zusammenstellen
+        working-directory: .
+        run: |
+          mkdir -p veroeffentlichen
+          rsync -a --exclude .git --exclude .github --exclude fallbeispiel-app webseite/ veroeffentlichen/
+          cp -r fallbeispiel-app/dist veroeffentlichen/app
+          # GitHub Pages nutzt nur die 404.html im Hauptordner – so lassen sich auch App-Unterseiten neu laden
+          mv veroeffentlichen/app/404.html veroeffentlichen/404.html
+          touch veroeffentlichen/.nojekyll
 
       - name: Auf GitHub Pages veröffentlichen (Branch gh-pages)
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./fallbeispiel-app/dist
+          publish_dir: ./veroeffentlichen
           force_orphan: true
           commit_message: 'Web-App aktualisiert'

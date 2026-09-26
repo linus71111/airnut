@@ -42,8 +42,9 @@ Bei jeder Änderung an der App baut GitHub automatisch eine neue **APK-Datei** (
 
 ## App auf das iPhone laden (Web-App)
 
-Die App wird automatisch als Web-App auf GitHub Pages veröffentlicht (Workflow `.github/workflows/web-app.yml`):
-**https://linus71111.github.io/airnut/**
+Die App wird automatisch als Web-App auf GitHub Pages veröffentlicht (Workflow `.github/workflows/web-app.yml`),
+zusammen mit der Webseite aus dem Branch `Website_1_0`:
+**https://linus71111.github.io/airnut/app/**
 
 1. Den Link in **Safari** öffnen (nicht in Chrome oder in der Claude-App).
 2. Unten auf **Teilen** (Viereck mit Pfeil) tippen → **„Zum Home-Bildschirm“** → **Hinzufügen**.
