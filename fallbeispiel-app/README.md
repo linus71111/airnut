@@ -6,9 +6,8 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 
 ## Funktionen
 
-- **20 fertige Fallbeispiele** (CPR, Kinder-Reanimation, erschöpfter Schwimmer, Ertrinkungsunfall, Reanimation, Unterzuckerung, starke Blutung,
-  Allergie, Wirbelsäule, Sonnenstich, Unterkühlung, Krampfanfall, Asthma, Schlaganfall, Herzinfarkt, Unterarmbruch,
-  Verbrennung, Nasenbluten, Ohnmacht, Hyperventilation) – jeweils mit
+- **60 fertige Fallbeispiele** in vier Themen: 🌊 Wasser (DLRG), 🏠 Alltag, 🚑 Rettungsdienst und 😄 Witzig
+  (z.B. Kaktus-Umarmung, Zunge am Geländer, Legostein in der Nase) – jeweils mit
   Lage zum Vorlesen, geheimer Mimen-Anleitung, Schminke/Requisiten, Vitalwerten und Checkliste.
 - **Patientenmonitor** mit Puls, SpO₂, Atemfrequenz, Blutdruck, Blutzucker, Temperatur,
   Bewusstsein, Haut und Pupillen. Werte außerhalb des Normbereichs werden rot markiert.
@@ -22,6 +21,7 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 - **Bewertung**: Jede:r Zuschauer:in hakt die Checkliste ab (Punkte, „WICHTIG“-Punkte) und kann Feedback schreiben.
 - **Ergebnis**: Prozent, Note, vergessene wichtige Punkte, Balken pro Prüfpunkt, Feedback –
   und **Teilen** (z.B. in die WhatsApp-Gruppe).
+- **Filter** nach Schwierigkeit und Thema, Suche, „So geht's“-Hinweis für neue Nutzer:innen.
 - **🎲 Zufallsfall** (Startseite und Menü, beachtet den Schwierigkeits-Filter, „Neu würfeln“ möglich).
 - **Schwierigkeit** leicht / mittel / schwer für jeden Fall, mit Filter auf der Startseite.
 - **Anleitung**: Rollen, Ablauf Schritt für Schritt, Nachbesprechung und Sicherheitsregeln.
@@ -130,7 +130,7 @@ Die Paketnamen stehen in `app.json` (`de.jet.fallbeispiel`) – ändert sie ggf.
 | `src/app/anleitung.tsx` | Anleitung zum Ablauf eines Fallbeispiels |
 | `src/app/personen/` | Liste der Helfer:innen und ihre Akte |
 | `src/app/verlauf.tsx` | Einsatz-Historie |
-| `src/data/faelle.ts` | **Die fertigen Fallbeispiele – hier könnt ihr Texte & Checklisten anpassen** |
+| `src/data/faelle*.ts` | **Die fertigen Fallbeispiele – hier könnt ihr Texte & Checklisten anpassen** (`faelle.ts` Wasser/Alltag, `faelleRettungsdienst.ts`, `faelleAlltag.ts`, `faelleWitzig.ts`) |
 | `src/lib/vitals.ts` | Normbereiche der Vitalwerte |
 | `src/components/VitalMonitor.tsx` | Der Patientenmonitor |
 

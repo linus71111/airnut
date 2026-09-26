@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { STANDARD_FAELLE } from '../data/faelle';
+import { ALLE_STANDARD_FAELLE } from '../data/alleFaelle';
 import type { Bewertung, Durchgang, Fallbeispiel, Person } from './types';
 
 const KEY_FAELLE = 'fallbeispiel.eigeneFaelle.v1';
@@ -66,7 +66,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (geladen) AsyncStorage.setItem(KEY_PERSONEN, JSON.stringify(personen)).catch(() => {});
   }, [personen, geladen]);
 
-  const faelle = useMemo(() => [...eigene, ...STANDARD_FAELLE], [eigene]);
+  const faelle = useMemo(() => [...eigene, ...ALLE_STANDARD_FAELLE], [eigene]);
 
   const fall = useCallback((id: string) => faelle.find((f) => f.id === id), [faelle]);
   const durchgang = useCallback((id: string) => durchgaenge.find((d) => d.id === id), [durchgaenge]);

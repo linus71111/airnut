@@ -1,13 +1,15 @@
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MenueKnopf } from '../components/Kopfleiste';
 import { Badge, SchwierigkeitBadge } from '../components/ui';
+import { useEinstellungen } from '../lib/einstellungen';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import { useStore } from '../lib/store';
-import type { Schwierigkeit } from '../lib/types';
+import { THEMA_INFO, THEMEN } from '../lib/thema';
+import type { Schwierigkeit, Thema } from '../lib/types';
 import { oeffneZufallsFall } from '../lib/zufall';
 import { abstand, kartenStil, macheStile, useFarben } from '../theme';
 
@@ -18,13 +20,17 @@ export default function Start() {
   const [suche, setSuche] = useState('');
   const [stufe, setStufe] = useState<Schwierigkeit | null>(null);
   const [sucheFokus, setSucheFokus] = useState(false);
+  const [thema, setThema] = useState<Thema | null>(null);
+  const { einstellungen, setze } = useEinstellungen();
   const insets = useSafeAreaInsets();
 
   if (!geladen) return <ActivityIndicator style={{ marginTop: 40 }} color={farben.rot} />;
 
   const s = suche.trim().toLowerCase();
   const gefiltert = faelle.filter(
-    (f) => (!s || (f.titel + ' ' + f.kurz).toLowerCase().includes(s)) && (!stufe || f.schwierigkeit === stufe),
+    (f) => (!s || (f.titel + ' ' + f.kurz).toLowerCase().includes(s)) &&
+      (!stufe || f.schwierigkeit === stufe) &&
+      (!thema || (f.thema ?? 'alltag') === thema),
   );
   const laufend = durchgaenge.filter((d) => !d.ende);
 
@@ -62,6 +68,33 @@ export default function Start() {
               <Zahl wert={personen.length} text="Helfer" />
             </View>
           </View>
+
+          {einstellungen.startHinweis && (
+            <View style={styles.tipp}>
+              <View style={styles.tippKopf}>
+                <Text style={styles.tippTitel}>👋 So geht's</Text>
+                <Pressable onPress={() => setze({ startHinweis: false })} hitSlop={10} accessibilityRole="button" accessibilityLabel="Hinweis ausblenden">
+                  <Text style={styles.tippZu}>✕</Text>
+                </Pressable>
+              </View>
+              {[
+                'Unter „Helfer“ das Team anlegen',
+                'Einen Fall antippen oder würfeln',
+                'Lage vorlesen, Helfer auswählen, Start drücken',
+                'Vitalwerte ansagen, danach bewerten die Zuschauer:innen',
+              ].map((t, i) => (
+                <View key={t} style={styles.tippZeile}>
+                  <View style={styles.tippNr}>
+                    <Text style={styles.tippNrText}>{i + 1}</Text>
+                  </View>
+                  <Text style={styles.tippText}>{t}</Text>
+                </View>
+              ))}
+              <Pressable onPress={() => router.push('/anleitung')} hitSlop={6}>
+                <Text style={styles.tippLink}>Ausführliche Anleitung ›</Text>
+              </Pressable>
+            </View>
+          )}
 
           {laufend.map((d) => (
             <Pressable
@@ -119,6 +152,19 @@ export default function Start() {
             ))}
           </View>
 
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.themen} style={styles.themenLeiste}>
+            <FilterChip text="Alle Themen" an={!thema} farbe={farben.neutral} onPress={() => setThema(null)} />
+            {THEMEN.map((t) => (
+              <FilterChip
+                key={t}
+                text={`${THEMA_INFO[t].icon} ${THEMA_INFO[t].label}`}
+                an={thema === t}
+                farbe={farben.neutral}
+                onPress={() => setThema(thema === t ? null : t)}
+              />
+            ))}
+          </ScrollView>
+
           <Pressable
             accessibilityRole="button"
             onPress={() => oeffneZufallsFall(faelle, stufe ?? undefined)}
@@ -150,7 +196,9 @@ export default function Start() {
           <View style={styles.fallFuss}>
             <SchwierigkeitBadge stufe={item.schwierigkeit} />
             {item.eigenes && <Badge text="EIGENER" farbe="#1565C0" />}
-            <Text style={styles.fallMeta}>{item.checkliste.length} Prüfpunkte</Text>
+            <Text style={styles.fallMeta}>
+              {THEMA_INFO[item.thema ?? 'alltag'].icon} · {item.checkliste.length} Prüfpunkte
+            </Text>
           </View>
         </Pressable>
       )}
@@ -276,7 +324,18 @@ const useStyles = macheStile((farben) => ({
     justifyContent: 'center',
   },
   sucheLoeschenText: { color: farben.textLeise, fontSize: 13, fontWeight: '800' },
-  filter: { flexDirection: 'row', gap: 8, marginBottom: abstand.m, flexWrap: 'wrap' },
+  filter: { flexDirection: 'row', gap: 8, marginBottom: abstand.s, flexWrap: 'wrap' },
+  themenLeiste: { marginHorizontal: -abstand.l, marginBottom: abstand.m },
+  themen: { flexDirection: 'row', gap: 8, paddingHorizontal: abstand.l },
+  tipp: { backgroundColor: farben.karte, borderRadius: 18, padding: abstand.l, marginBottom: abstand.m, gap: 10, ...kartenStil(farben) },
+  tippKopf: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  tippTitel: { fontSize: 17, fontWeight: '900', color: farben.text },
+  tippZu: { fontSize: 16, color: farben.textLeise, fontWeight: '800' },
+  tippZeile: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  tippNr: { width: 26, height: 26, borderRadius: 13, backgroundColor: farben.tonal, alignItems: 'center', justifyContent: 'center' },
+  tippNrText: { color: farben.rot, fontWeight: '900', fontSize: 13 },
+  tippText: { flex: 1, fontSize: 15, color: farben.text, lineHeight: 20 },
+  tippLink: { color: farben.rot, fontWeight: '800', fontSize: 15, marginTop: 2 },
   chip: { borderWidth: 1.5, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: farben.karte },
   chipText: { fontSize: 14, fontWeight: '800' },
   zufall: {

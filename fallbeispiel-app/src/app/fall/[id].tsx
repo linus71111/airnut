@@ -10,6 +10,7 @@ import { bestaetigen } from '../../lib/bestaetigen';
 import { neueId } from '../../lib/score';
 import { QUALIFIKATION_INFO } from '../../lib/qualifikation';
 import { useStore } from '../../lib/store';
+import { THEMA_INFO } from '../../lib/thema';
 import type { Schwierigkeit } from '../../lib/types';
 import { oeffneZufallsFall } from '../../lib/zufall';
 import { abstand, macheStile, useFarben } from '../../theme';
@@ -26,6 +27,7 @@ export default function FallDetail() {
   /** Punkte, die in diesem Durchgang nicht bewertet werden */
   const [abgewaehlt, setAbgewaehlt] = useState<Record<string, boolean>>({});
   const [mimeZeigen, setMimeZeigen] = useState(false);
+  const [listeOffen, setListeOffen] = useState(false);
   const insets = useSafeAreaInsets();
 
   if (!f) return <Absatz>Fallbeispiel nicht gefunden.</Absatz>;
@@ -66,8 +68,11 @@ export default function FallDetail() {
         </View>
       )}
       <Text style={styles.titel}>{f.titel}</Text>
-      <View style={{ flexDirection: 'row', marginTop: -abstand.s, marginBottom: abstand.m }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -abstand.s, marginBottom: abstand.m }}>
         <SchwierigkeitBadge stufe={f.schwierigkeit} />
+        <Text style={styles.thema}>
+          {THEMA_INFO[f.thema ?? 'alltag'].icon} {THEMA_INFO[f.thema ?? 'alltag'].label}
+        </Text>
       </View>
 
       <Karte>
@@ -75,76 +80,12 @@ export default function FallDetail() {
         <Absatz>{f.lage}</Absatz>
       </Karte>
 
-      <Karte>
-        <Ueberschrift>🎭 Für Mime & Spielleitung</Ueberschrift>
-        {mimeZeigen ? (
-          <>
-            <Absatz>{f.mimeAnleitung}</Absatz>
-            {f.requisiten ? (
-              <View style={{ marginTop: abstand.m }}>
-                <Absatz leise>Schminke & Requisiten: {f.requisiten}</Absatz>
-              </View>
-            ) : null}
-          </>
-        ) : (
-          <Absatz leise>Geheim – nicht den Helfer:innen zeigen!</Absatz>
-        )}
-        <Knopf
-          titel={mimeZeigen ? 'Verbergen' : 'Anzeigen'}
-          art="sekundaer"
-          onPress={() => setMimeZeigen(!mimeZeigen)}
-          stil={{ marginTop: abstand.m }}
-        />
-      </Karte>
-
-      <Ueberschrift>Vitalwerte zu Beginn</Ueberschrift>
-      <VitalMonitor werte={f.vitalStart} />
-
-      <Karte>
-        <Ueberschrift>
-          ✅ Checkliste ({aktiv.length}
-          {anzahlAus > 0 ? ` von ${f.checkliste.length}` : ''} Punkte)
-        </Ueberschrift>
-        <Absatz leise>Tippe einen Punkt an, wenn er diesmal nicht bewertet werden soll (z.B. kein Übungs-AED vorhanden).</Absatz>
-        {anzahlAus > 0 && (
-          <Pressable onPress={() => setAbgewaehlt({})} hitSlop={6} style={{ marginTop: abstand.s }}>
-            <Text style={styles.alleAn}>↺ Alle {anzahlAus} abgewählten Punkte wieder aktivieren</Text>
-          </Pressable>
-        )}
-        {kategorien.map((k) => (
-          <View key={k} style={{ marginBottom: abstand.s }}>
-            <Text style={styles.kategorie}>{k}</Text>
-            {f.checkliste
-              .filter((c) => c.kategorie === k)
-              .map((c) => (
-                <Pressable
-                  key={c.id}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: !abgewaehlt[c.id] }}
-                  onPress={() => setAbgewaehlt((a) => ({ ...a, [c.id]: !a[c.id] }))}
-                  style={({ pressed }) => [styles.punkt, abgewaehlt[c.id] && { opacity: 0.45 }, pressed && { opacity: 0.6 }]}>
-                  <Text style={[styles.punktText, abgewaehlt[c.id] && styles.durchgestrichen]}>
-                    {abgewaehlt[c.id] ? '⊘' : '•'} {c.text}
-                  </Text>
-                  <View style={{ flexDirection: 'row', gap: 4 }}>
-                    {abgewaehlt[c.id] ? (
-                      <Badge text="ABGEWÄHLT" farbe="#5F6368" />
-                    ) : (
-                      <>
-                        {c.kritisch && <Badge text="WICHTIG" />}
-                        <Badge text={`${c.punkte} P`} farbe="#5F6368" />
-                      </>
-                    )}
-                  </View>
-                </Pressable>
-              ))}
-          </View>
-        ))}
-      </Karte>
-
       <Karte stil={{ backgroundColor: farben.hinweis }}>
-        <Ueberschrift>Durchgang starten</Ueberschrift>
+        <Ueberschrift>▶ Durchgang starten</Ueberschrift>
         <Text style={styles.label}>Wer hilft? (antippen)</Text>
+        {personen.length === 0 && (
+          <Text style={styles.keineHelfer}>Noch keine Helfer:innen angelegt – lege sie hier an oder starte ohne Namen.</Text>
+        )}
         <View style={styles.chips}>
           {personen.map((p) => {
             const an = helfer.includes(p.id);
@@ -176,6 +117,81 @@ export default function FallDetail() {
         <Eingabe label="Teamname (optional)" value={team} onChangeText={setTeam} placeholder="sonst die Namen der Helfer:innen" />
         <Knopf titel={`▶ Start (${aktiv.length} Prüfpunkte)`} onPress={starten} deaktiviert={aktiv.length === 0} />
       </Karte>
+
+      <Karte>
+        <Ueberschrift>🎭 Für Mime & Spielleitung</Ueberschrift>
+        {mimeZeigen ? (
+          <>
+            <Absatz>{f.mimeAnleitung}</Absatz>
+            {f.requisiten ? (
+              <View style={{ marginTop: abstand.m }}>
+                <Absatz leise>Schminke & Requisiten: {f.requisiten}</Absatz>
+              </View>
+            ) : null}
+          </>
+        ) : (
+          <Absatz leise>Geheim – nicht den Helfer:innen zeigen!</Absatz>
+        )}
+        <Knopf
+          titel={mimeZeigen ? 'Verbergen' : 'Anzeigen'}
+          art="sekundaer"
+          onPress={() => setMimeZeigen(!mimeZeigen)}
+          stil={{ marginTop: abstand.m }}
+        />
+      </Karte>
+
+      <Ueberschrift>Vitalwerte zu Beginn</Ueberschrift>
+      <VitalMonitor werte={f.vitalStart} />
+
+      <Karte>
+        <Pressable onPress={() => setListeOffen(!listeOffen)} accessibilityRole="button" style={styles.aufklapp}>
+          <Ueberschrift>
+            ✅ Checkliste ({aktiv.length}
+            {anzahlAus > 0 ? ` von ${f.checkliste.length}` : ''} Punkte)
+          </Ueberschrift>
+          <Text style={styles.aufklappText}>{listeOffen ? 'Zuklappen ▴' : 'Anzeigen ▾'}</Text>
+        </Pressable>
+        <Absatz leise>
+          {listeOffen
+            ? 'Tippe einen Punkt an, wenn er diesmal nicht bewertet werden soll (z.B. kein Übungs-AED vorhanden).'
+            : 'Hier kannst du sehen, worauf die Zuschauer:innen achten, und Punkte für diesen Durchgang abwählen.'}
+        </Absatz>
+        {anzahlAus > 0 && (
+          <Pressable onPress={() => setAbgewaehlt({})} hitSlop={6} style={{ marginTop: abstand.s }}>
+            <Text style={styles.alleAn}>↺ Alle {anzahlAus} abgewählten Punkte wieder aktivieren</Text>
+          </Pressable>
+        )}
+        {listeOffen && kategorien.map((k) => (
+          <View key={k} style={{ marginBottom: abstand.s }}>
+            <Text style={styles.kategorie}>{k}</Text>
+            {f.checkliste
+              .filter((c) => c.kategorie === k)
+              .map((c) => (
+                <Pressable
+                  key={c.id}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: !abgewaehlt[c.id] }}
+                  onPress={() => setAbgewaehlt((a) => ({ ...a, [c.id]: !a[c.id] }))}
+                  style={({ pressed }) => [styles.punkt, abgewaehlt[c.id] && { opacity: 0.45 }, pressed && { opacity: 0.6 }]}>
+                  <Text style={[styles.punktText, abgewaehlt[c.id] && styles.durchgestrichen]}>
+                    {abgewaehlt[c.id] ? '⊘' : '•'} {c.text}
+                  </Text>
+                  <View style={{ flexDirection: 'row', gap: 4 }}>
+                    {abgewaehlt[c.id] ? (
+                      <Badge text="ABGEWÄHLT" farbe="#5F6368" />
+                    ) : (
+                      <>
+                        {c.kritisch && <Badge text="WICHTIG" />}
+                        <Badge text={`${c.punkte} P`} farbe="#5F6368" />
+                      </>
+                    )}
+                  </View>
+                </Pressable>
+              ))}
+          </View>
+        ))}
+      </Karte>
+
 
       <View style={{ flexDirection: 'row', gap: abstand.m }}>
         <Knopf
@@ -221,6 +237,10 @@ const useStyles = macheStile((farben) => ({
   zufallText: { color: farben.text, fontWeight: '800', fontSize: 15 },
   zufallKnopf: { color: farben.rot, fontWeight: '900', fontSize: 15 },
   alleAn: { color: farben.rot, fontWeight: '800' },
+  keineHelfer: { color: farben.textLeise, fontSize: 14, marginBottom: abstand.s },
+  aufklapp: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
+  aufklappText: { color: farben.rot, fontWeight: '800', fontSize: 14, marginTop: 3 },
+  thema: { fontSize: 13, fontWeight: '700', color: farben.textLeise },
   label: { fontSize: 13, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },
   chip: { borderWidth: 1, borderColor: farben.rand, backgroundColor: farben.eingabe, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 7 },

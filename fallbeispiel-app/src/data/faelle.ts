@@ -4,9 +4,9 @@ import { NORMALWERTE } from '../lib/vitals';
 // Hinweis: Die Inhalte sind Übungs-Fallbeispiele für die Erste-Hilfe-/Sanitätsausbildung
 // und ersetzen keine Ausbildung. Bitte vor dem Einsatz mit euren Ausbilder:innen abstimmen.
 
-type Punkt = [text: string, kategorie: Kategorie, punkte?: number, kritisch?: boolean];
+export type Punkt = [text: string, kategorie: Kategorie, punkte?: number, kritisch?: boolean];
 
-function liste(prefix: string, punkte: Punkt[]): CheckItem[] {
+export function liste(prefix: string, punkte: Punkt[]): CheckItem[] {
   return punkte.map(([text, kategorie, p = 1, kritisch], i) => ({
     id: `${prefix}-${i + 1}`,
     text,
@@ -16,18 +16,18 @@ function liste(prefix: string, punkte: Punkt[]): CheckItem[] {
   }));
 }
 
-function werte(w: Partial<Vitalwerte>): Vitalwerte {
+export function werte(w: Partial<Vitalwerte>): Vitalwerte {
   return { ...NORMALWERTE, ...w };
 }
 
-const START: Punkt[] = [
+export const START: Punkt[] = [
   ['Eigenschutz beachtet (Handschuhe, Gefahren erkannt)', 'Eigenschutz', 2, true],
   ['Person angesprochen und sich vorgestellt', 'Erstkontakt'],
 ];
 
-const NOTRUF: Punkt[] = [['Notruf 112 abgesetzt (Wo? Was? Wie viele? Welche Verletzungen? Warten auf Rückfragen)', 'Notruf', 2, true]];
+export const NOTRUF: Punkt[] = [['Notruf 112 abgesetzt (Wo? Was? Wie viele? Welche Verletzungen? Warten auf Rückfragen)', 'Notruf', 2, true]];
 
-const ENDE: Punkt[] = [
+export const ENDE: Punkt[] = [
   ['Betroffene Person betreut, beruhigt und nicht allein gelassen', 'Betreuung'],
   ['Vitalwerte regelmäßig kontrolliert', 'Betreuung'],
   ['Übergabe an den Rettungsdienst (Was ist passiert? Was wurde gemacht?)', 'Übergabe'],
@@ -36,6 +36,7 @@ const ENDE: Punkt[] = [
 export const STANDARD_FAELLE: Fallbeispiel[] = [
   {
     id: 'cpr-standard',
+    thema: 'alltag',
     schwierigkeit: 'mittel',
     titel: 'CPR – Reanimation Standardablauf',
     kurz: 'Person bricht zusammen und atmet nicht normal – Wiederbelebung Schritt für Schritt.',
@@ -75,6 +76,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'ertrinken-bewusstlos',
+    thema: 'wasser',
     schwierigkeit: 'mittel',
     titel: 'Ertrinkungsunfall – bewusstlos mit Atmung',
     kurz: 'Badegast wurde aus dem Wasser gezogen, atmet aber.',
@@ -118,6 +120,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'reanimation',
+    thema: 'wasser',
     schwierigkeit: 'schwer',
     titel: 'Herz-Kreislauf-Stillstand am Beckenrand',
     kurz: 'Älterer Badegast bricht zusammen – keine normale Atmung.',
@@ -154,6 +157,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'unterzucker',
+    thema: 'alltag',
     schwierigkeit: 'leicht',
     titel: 'Unterzuckerung beim Training',
     kurz: 'Jugendliche mit Diabetes wird zittrig und verwirrt.',
@@ -191,6 +195,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'schnittwunde',
+    thema: 'wasser',
     schwierigkeit: 'leicht',
     titel: 'Starke Blutung am Unterarm',
     kurz: 'Schnitt an einer Glasscherbe, es blutet stark.',
@@ -222,6 +227,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'allergie',
+    thema: 'alltag',
     schwierigkeit: 'mittel',
     titel: 'Wespenstich mit allergischer Reaktion',
     kurz: 'Stich beim Eisessen – Schwellung, Atemnot.',
@@ -254,6 +260,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'wirbelsaeule',
+    thema: 'wasser',
     schwierigkeit: 'schwer',
     titel: 'Kopfsprung ins flache Wasser',
     kurz: 'Verdacht auf Wirbelsäulenverletzung.',
@@ -285,6 +292,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'hitze',
+    thema: 'alltag',
     schwierigkeit: 'leicht',
     titel: 'Sonnenstich am Wachturm',
     kurz: 'Kopfschmerzen, Übelkeit nach langem Aufenthalt in der Sonne.',
@@ -316,6 +324,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'unterkuehlung',
+    thema: 'wasser',
     schwierigkeit: 'mittel',
     titel: 'Unterkühlung nach langem Schwimmen',
     kurz: 'Schwimmer kommt zitternd aus dem kalten See.',
@@ -347,6 +356,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'krampfanfall',
+    thema: 'wasser',
     schwierigkeit: 'mittel',
     titel: 'Krampfanfall am Beckenrand',
     kurz: 'Person stürzt und krampft.',
@@ -387,6 +397,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'kind-reanimation',
+    thema: 'wasser',
     schwierigkeit: 'schwer',
     titel: 'Kind leblos aus dem Wasser gezogen',
     kurz: 'Reanimation bei einem Kind nach Ertrinkungsunfall – mit 5 Initialbeatmungen.',
@@ -423,6 +434,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'erschoepfter-schwimmer',
+    thema: 'wasser',
     schwierigkeit: 'mittel',
     titel: 'Erschöpfter Schwimmer im See',
     kurz: 'Ein Schwimmer ruft um Hilfe und geht immer wieder unter.',
@@ -457,6 +469,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'asthma',
+    thema: 'alltag',
     schwierigkeit: 'mittel',
     titel: 'Asthmaanfall nach dem Sport',
     kurz: 'Jugendlicher bekommt schlecht Luft und keucht.',
@@ -488,6 +501,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'schlaganfall',
+    thema: 'alltag',
     schwierigkeit: 'mittel',
     titel: 'Verdacht auf Schlaganfall',
     kurz: 'Hängender Mundwinkel, verwaschene Sprache.',
@@ -520,6 +534,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'herzinfarkt',
+    thema: 'alltag',
     schwierigkeit: 'mittel',
     titel: 'Brustschmerzen – Verdacht auf Herzinfarkt',
     kurz: 'Starker Druck auf der Brust, Schmerzen im linken Arm.',
@@ -551,6 +566,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'unterarmbruch',
+    thema: 'alltag',
     schwierigkeit: 'leicht',
     titel: 'Sturz vom Skateboard – Unterarmbruch',
     kurz: 'Schmerzen und Fehlstellung am Unterarm.',
@@ -582,6 +598,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'verbrennung',
+    thema: 'alltag',
     schwierigkeit: 'leicht',
     titel: 'Verbrennung am Grill',
     kurz: 'Brandblasen an Hand und Unterarm.',
@@ -613,6 +630,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'nasenbluten',
+    thema: 'alltag',
     schwierigkeit: 'leicht',
     titel: 'Starkes Nasenbluten',
     kurz: 'Nach einem Ball ins Gesicht blutet die Nase stark.',
@@ -637,6 +655,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'ohnmacht',
+    thema: 'alltag',
     schwierigkeit: 'leicht',
     titel: 'Ohnmacht bei der Siegerehrung',
     kurz: 'Kurz bewusstlos nach langem Stehen in der Hitze.',
@@ -668,6 +687,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'hyperventilation',
+    thema: 'alltag',
     schwierigkeit: 'leicht',
     titel: 'Hyperventilation nach Streit',
     kurz: 'Schnelle Atmung, Kribbeln in den Händen, Angst.',

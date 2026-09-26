@@ -80,6 +80,12 @@ export default function EinstellungenSeite() {
           onChange={(v) => setze({ messenModus: v })}
         />
         <Schalter
+          titel="„So geht's“-Hinweis auf der Startseite"
+          text="Kurze Schritt-für-Schritt-Hilfe für neue Nutzer:innen."
+          wert={e.startHinweis}
+          onChange={(v) => setze({ startHinweis: v })}
+        />
+        <Schalter
           titel="Werte im Einsatz ändern"
           text="Aus: Die Vitalwerte bleiben fest und werden nur angesagt. An: Die Spielleitung kann sie mit + / – und „Nach Behandlung“ verändern."
           wert={e.werteAendern}

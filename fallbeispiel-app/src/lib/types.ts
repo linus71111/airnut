@@ -26,10 +26,15 @@ export type CheckItem = {
 
 export type Schwierigkeit = 'leicht' | 'mittel' | 'schwer';
 
+/** Themenbereich eines Falls (für den Filter auf der Startseite) */
+export type Thema = 'wasser' | 'alltag' | 'rettungsdienst' | 'witzig';
+
 export type Fallbeispiel = {
   id: string;
   titel: string;
   schwierigkeit: Schwierigkeit;
+  /** Fehlt bei älteren eigenen Fällen – gilt dann als „Alltag“ */
+  thema?: Thema;
   kurz: string;
   /** Was die Helfer:innen beim Eintreffen vorfinden – wird vorgelesen */
   lage: string;

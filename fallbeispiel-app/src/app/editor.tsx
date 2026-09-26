@@ -7,6 +7,7 @@ import { Absatz, Eingabe, Karte, Knopf, Ueberschrift, Umschalter } from '../comp
 import { neueId } from '../lib/score';
 import { useStore } from '../lib/store';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
+import { THEMA_INFO, THEMEN } from '../lib/thema';
 import type { CheckItem, Fallbeispiel, Kategorie, Vitalwerte } from '../lib/types';
 import { BEWUSSTSEIN_STUFEN, NORMALWERTE, VITAL_DEFS } from '../lib/vitals';
 import { abstand, macheStile, useFarben } from '../theme';
@@ -71,6 +72,17 @@ export default function Editor() {
         <View style={[styles.chips, { marginBottom: abstand.m }]}>
           {SCHWIERIGKEITEN.map((st) => (
             <Chip key={st} text={SCHWIERIGKEIT_INFO[st].label} an={f.schwierigkeit === st} onPress={() => setze('schwierigkeit', st)} />
+          ))}
+        </View>
+        <Text style={[styles.klein, { marginBottom: 2 }]}>THEMA</Text>
+        <View style={[styles.chips, { marginBottom: abstand.m }]}>
+          {THEMEN.map((t) => (
+            <Chip
+              key={t}
+              text={`${THEMA_INFO[t].icon} ${THEMA_INFO[t].label}`}
+              an={(f.thema ?? 'alltag') === t}
+              onPress={() => setze('thema', t)}
+            />
           ))}
         </View>
         <Eingabe label="Kurzbeschreibung" value={f.kurz} onChangeText={(t) => setze('kurz', t)} />

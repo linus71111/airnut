@@ -51,6 +51,7 @@ export function MenueKnopf({ imInhalt }: { imInhalt?: boolean }) {
           pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
         ]}>
         <Text style={styles.burger}>☰</Text>
+        <Text style={styles.menueText}>Menü</Text>
       </Pressable>
 
       <Modal visible={offen} transparent animationType="fade" onRequestClose={() => setOffen(false)}>
@@ -116,15 +117,22 @@ const useStyles = macheStile((farben) => ({
   zurueckPfeil: { color: farben.rot, fontSize: 30, fontWeight: '300', marginTop: -3 },
   zurueck: { color: farben.rot, fontSize: 17, fontWeight: '700' },
   menueKnopf: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: farben.tonal,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 6,
+    height: 40,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: farben.rot,
     marginRight: Platform.OS === 'web' ? abstand.l : 0,
+    shadowColor: '#E2001A',
+    shadowOpacity: farben.dunkel ? 0 : 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
-  burger: { color: farben.rot, fontSize: 20, fontWeight: '800' },
+  burger: { color: '#fff', fontSize: 18, fontWeight: '900' },
+  menueText: { color: '#fff', fontSize: 15, fontWeight: '800' },
   hintergrund: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'flex-end' },
   panel: {
     backgroundColor: farben.karte,
