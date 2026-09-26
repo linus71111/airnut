@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { MenueKnopf, ZurueckKnopf } from '../components/Kopfleiste';
@@ -28,6 +29,16 @@ function Navigation() {
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(farben.hintergrund).catch(() => {});
   }, [farben]);
+
+  // Im Browser den schwarzen Standard-Fokusrahmen in Eingabefeldern entfernen;
+  // die Felder zeigen den Fokus selbst mit einem roten Rand an.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const stil = document.createElement('style');
+    stil.textContent = 'input:focus, textarea:focus { outline: none !important; }';
+    document.head.appendChild(stil);
+    return () => stil.remove();
+  }, []);
 
   return (
     <>

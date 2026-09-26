@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, Switch, Text, TextInput, View, type SwitchProps, type TextInputProps, type ViewStyle } from 'react-native';
 
 import { SCHWIERIGKEIT_INFO } from '../lib/schwierigkeit';
@@ -60,10 +60,23 @@ export function Absatz({ children, leise }: { children: ReactNode; leise?: boole
 export function Eingabe({ label, ...props }: TextInputProps & { label: string }) {
   const styles = useStyles();
   const farben = useFarben();
+  const [fokus, setFokus] = useState(false);
   return (
     <View style={{ marginBottom: abstand.m }}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput placeholderTextColor={farben.platzhalter} {...props} style={[styles.eingabe, props.multiline && { minHeight: 80, textAlignVertical: 'top' }, props.style]} />
+      <TextInput
+        placeholderTextColor={farben.platzhalter}
+        {...props}
+        onFocus={(e) => {
+          setFokus(true);
+          props.onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setFokus(false);
+          props.onBlur?.(e);
+        }}
+        style={[styles.eingabe, fokus && { borderColor: farben.rot }, props.multiline && { minHeight: 80, textAlignVertical: 'top' }, props.style]}
+      />
     </View>
   );
 }
@@ -110,7 +123,7 @@ const useStyles = macheStile((farben) => ({
   label: { fontSize: 12, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.6 },
   eingabe: {
     backgroundColor: farben.eingabe,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: farben.rand,
     borderRadius: 12,
     padding: 12,

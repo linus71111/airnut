@@ -37,6 +37,7 @@ export default function Editor() {
   const { fall, speichereFall } = useStore();
   const insets = useSafeAreaInsets();
 
+  const [fokusPunkt, setFokusPunkt] = useState<string | null>(null);
   const [f, setF] = useState<Fallbeispiel>(() => {
     const basis = (id && fall(id)) || (vorlage && fall(vorlage));
     if (!basis) return { ...LEERER_FALL, id: neueId() };
@@ -107,7 +108,9 @@ export default function Editor() {
             placeholder="Was soll gemacht werden?"
             placeholderTextColor={farben.platzhalter}
             multiline
-            style={styles.punktEingabe}
+            onFocus={() => setFokusPunkt(c.id)}
+            onBlur={() => setFokusPunkt(null)}
+            style={[styles.punktEingabe, fokusPunkt === c.id && { borderBottomColor: farben.rot }]}
           />
           <View style={styles.chips}>
             {KATEGORIEN.map((k) => (
@@ -173,17 +176,21 @@ function VitalEditor({ werte, onChange }: { werte: Vitalwerte; onChange: (w: Vit
 /** Zahleneingabe, die auch Komma akzeptiert und Zwischenstände wie "36," erlaubt */
 function ZahlFeld({ wert, onWert }: { wert: number; onWert: (v: number) => void }) {
   const styles = useStyles();
+  const farben = useFarben();
   const [text, setText] = useState(String(wert).replace('.', ','));
+  const [fokus, setFokus] = useState(false);
   return (
     <TextInput
       value={text}
       keyboardType="decimal-pad"
+      onFocus={() => setFokus(true)}
+      onBlur={() => setFokus(false)}
       onChangeText={(t) => {
         setText(t);
         const zahl = parseFloat(t.replace(',', '.'));
         if (Number.isFinite(zahl)) onWert(zahl);
       }}
-      style={styles.zahl}
+      style={[styles.zahl, fokus && { borderColor: farben.rot }]}
     />
   );
 }
@@ -204,9 +211,9 @@ const useStyles = macheStile((farben) => ({
   feld: { flexBasis: '45%', flexGrow: 1 },
   klein: { fontSize: 12, fontWeight: '700', color: farben.textLeise },
   zahl: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: farben.rand,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 10,
     fontSize: 18,
     fontWeight: '700',
@@ -217,7 +224,7 @@ const useStyles = macheStile((farben) => ({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
   chip: { borderWidth: 1, borderColor: farben.rand, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: farben.eingabe },
   chipText: { fontSize: 13, color: farben.text, fontWeight: '600' },
-  punktEingabe: { fontSize: 16, color: farben.text, borderBottomWidth: 1, borderBottomColor: farben.rand, paddingVertical: 6 },
+  punktEingabe: { fontSize: 16, color: farben.text, borderBottomWidth: 1.5, borderBottomColor: farben.rand, paddingVertical: 6 },
   entfernen: { color: farben.fehler, fontWeight: '700' },
   fehler: { color: farben.fehler, marginTop: abstand.m, fontWeight: '700' },
 }));

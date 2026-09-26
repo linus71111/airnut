@@ -17,6 +17,7 @@ export default function Start() {
   const { faelle, durchgaenge, personen, geladen } = useStore();
   const [suche, setSuche] = useState('');
   const [stufe, setStufe] = useState<Schwierigkeit | null>(null);
+  const [sucheFokus, setSucheFokus] = useState(false);
   const insets = useSafeAreaInsets();
 
   if (!geladen) return <ActivityIndicator style={{ marginTop: 40 }} color={farben.rot} />;
@@ -85,15 +86,24 @@ export default function Start() {
             <Kachel icon="➕" text="Neuer Fall" ziel="/editor" />
           </View>
 
-          <View style={styles.suche}>
+          <View style={[styles.suche, sucheFokus && styles.sucheFokus]}>
             <Text style={styles.sucheIcon}>🔍</Text>
             <TextInput
               value={suche}
               onChangeText={setSuche}
+              onFocus={() => setSucheFokus(true)}
+              onBlur={() => setSucheFokus(false)}
               placeholder="Fallbeispiel suchen"
               placeholderTextColor={farben.platzhalter}
+              returnKeyType="search"
+              autoCorrect={false}
               style={styles.sucheFeld}
             />
+            {suche.length > 0 && (
+              <Pressable onPress={() => setSuche('')} hitSlop={10} accessibilityRole="button" accessibilityLabel="Suche löschen" style={styles.sucheLoeschen}>
+                <Text style={styles.sucheLoeschenText}>✕</Text>
+              </Pressable>
+            )}
           </View>
 
           <View style={styles.filter}>
@@ -247,13 +257,25 @@ const useStyles = macheStile((farben) => ({
     alignItems: 'center',
     backgroundColor: farben.eingabe,
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: farben.rand,
-    paddingHorizontal: 12,
+    paddingLeft: 14,
+    paddingRight: 8,
+    minHeight: 50,
     marginBottom: abstand.m,
   },
+  sucheFokus: { borderColor: farben.rot },
   sucheIcon: { fontSize: 15, opacity: 0.6 },
-  sucheFeld: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, fontSize: 16, color: farben.text },
+  sucheFeld: { flex: 1, alignSelf: 'stretch', paddingVertical: 12, paddingHorizontal: 10, fontSize: 16, color: farben.text },
+  sucheLoeschen: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: farben.balkenHg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sucheLoeschenText: { color: farben.textLeise, fontSize: 13, fontWeight: '800' },
   filter: { flexDirection: 'row', gap: 8, marginBottom: abstand.m, flexWrap: 'wrap' },
   chip: { borderWidth: 1.5, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: farben.karte },
   chipText: { fontSize: 14, fontWeight: '800' },
