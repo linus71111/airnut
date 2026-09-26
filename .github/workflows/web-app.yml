@@ -1,0 +1,59 @@
+# Veröffentlicht die Fallbeispiel-App als Web-App auf GitHub Pages:
+# https://linus71111.github.io/airnut/ – auf dem iPhone in Safari öffnen und "Zum Home-Bildschirm" wählen.
+name: Web-App veröffentlichen
+
+on:
+  push:
+    branches: [claude/fallball-app-dlrg-bdf20o]
+    paths:
+      - 'fallbeispiel-app/**'
+      - '.github/workflows/web-app.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-app
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fallbeispiel-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: fallbeispiel-app/package-lock.json
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Unterordner /airnut für GitHub Pages einstellen
+        run: |
+          node -e '
+            const fs = require("fs");
+            const a = JSON.parse(fs.readFileSync("app.json"));
+            a.expo.experiments = { ...a.expo.experiments, baseUrl: "/airnut" };
+            fs.writeFileSync("app.json", JSON.stringify(a, null, 2));
+          '
+
+      - name: Web-Version bauen
+        run: npx expo export --platform web --output-dir dist
+
+      - name: Als installierbare Web-App vorbereiten
+        run: node scripts/pwa.mjs dist /airnut
+
+      - name: Auf GitHub Pages veröffentlichen (Branch gh-pages)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./fallbeispiel-app/dist
+          force_orphan: true
+          commit_message: 'Web-App aktualisiert'

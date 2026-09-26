@@ -40,8 +40,20 @@ Bei jeder Änderung an der App baut GitHub automatisch eine neue **APK-Datei** (
 3. Datei öffnen → dem Browser erlauben, Apps zu installieren → „Installieren“.
    Wenn Google Play Protect warnt: „Trotzdem installieren“ (die App ist nicht aus dem Play Store, deshalb die Warnung).
 
-**iPhone:** Apple erlaubt das Installieren von Dateien wie einer APK nicht. Zum Testen Expo Go nutzen (siehe unten).
-Für eine richtige iPhone-App braucht man einen Apple-Developer-Account (99 € pro Jahr) und EAS Build.
+## App auf das iPhone laden (Web-App)
+
+Die App wird automatisch als Web-App auf GitHub Pages veröffentlicht (Workflow `.github/workflows/web-app.yml`):
+**https://linus71111.github.io/airnut/**
+
+1. Den Link in **Safari** öffnen (nicht in Chrome oder in der Claude-App).
+2. Unten auf **Teilen** (Viereck mit Pfeil) tippen → **„Zum Home-Bildschirm“** → **Hinzufügen**.
+3. Die App erscheint mit dem Rettungsring-Symbol auf dem Home-Bildschirm, startet ohne Browserleiste
+   und funktioniert nach dem ersten Öffnen auch ohne Internet.
+
+Einmalig nötig: In GitHub unter **Settings → Pages** bei „Build and deployment“ die Quelle
+**„Deploy from a branch“**, Branch **`gh-pages`** und Ordner **`/ (root)`** wählen und speichern.
+
+Für eine „echte“ App aus dem App Store braucht man einen Apple-Developer-Account (99 € pro Jahr) und EAS Build.
 
 ## Auf dem Handy testen (mit Expo Go)
 
