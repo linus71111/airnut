@@ -33,6 +33,14 @@ export default function DurchgangScreen() {
   const [lageZeigen, setLageZeigen] = useState(false);
   const [jetzt, setJetzt] = useState(Date.now());
   const [reiter, setReiter] = useState<'monitor' | 'bewertung'>('monitor');
+  /** Name der zuletzt abgegebenen Live-Bewertung (für die Bestätigung) */
+  const [abgegeben, setAbgegeben] = useState<string | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  useEffect(() => {
+    if (!abgegeben) return;
+    const t = setTimeout(() => setAbgegeben(null), 4000);
+    return () => clearTimeout(t);
+  }, [abgegeben]);
 
   const laeuft = !!d && !d.ende;
   useEffect(() => {
@@ -67,27 +75,35 @@ export default function DurchgangScreen() {
     setzeLive({ erledigt: { ...live.erledigt, [itemId]: an }, zeiten });
   };
 
-  /** Beenden: Die Live-Bewertung wird automatisch als Bewertung gespeichert */
+  const liveHatInhalt = liveAnzahl > 0 || !!live.notiz.trim();
+  const liveName = live.name.trim() || `Live-Bewertung ${d.bewertungen.length + 1}`;
+  const liveAlsBewertung = () => ({
+    id: neueId(),
+    name: `${liveName} (live)`,
+    erledigt: live.erledigt,
+    zeiten: live.zeiten,
+    notiz: live.notiz.trim(),
+    zeit: Date.now(),
+  });
+
+  /** Live-Bewertung speichern, die Übung läuft weiter; die Checkliste ist danach leer für die nächste Person */
+  const liveAbgeben = () => {
+    if (!liveHatInhalt) return;
+    speichereDurchgang({ ...d, bewertungen: [...d.bewertungen, liveAlsBewertung()], live: undefined });
+    setAbgegeben(liveName);
+    // nach dem Neuzeichnen nach oben springen, damit die nächste Person oben anfängt
+    setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: false }), 50);
+  };
+
+  /** Beenden: Eine noch offene Live-Bewertung wird automatisch mitgespeichert */
   const beenden = () => {
     const neu: Durchgang = { ...d, ende: Date.now(), live: undefined };
-    if (liveAnzahl > 0 || live.notiz.trim()) {
-      neu.bewertungen = [
-        ...d.bewertungen,
-        {
-          id: neueId(),
-          name: `${live.name.trim() || 'Live-Bewertung'} (live)`,
-          erledigt: live.erledigt,
-          zeiten: live.zeiten,
-          notiz: live.notiz.trim(),
-          zeit: Date.now(),
-        },
-      ];
-    }
+    if (liveHatInhalt) neu.bewertungen = [...d.bewertungen, liveAlsBewertung()];
     speichereDurchgang(neu);
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}>
+    <ScrollView ref={scrollRef} contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}>
       <Stack.Screen options={{ title: d.team }} />
 
       <View style={[styles.timer, !laeuft && { backgroundColor: farben.timerBeendet }]}>
@@ -150,10 +166,20 @@ export default function DurchgangScreen() {
             </>
           ) : (
             <>
+              {abgegeben && (
+                <View style={styles.gespeichert}>
+                  <Text style={styles.gespeichertText}>✓ Bewertung von {abgegeben} gespeichert – die Übung läuft weiter</Text>
+                </View>
+              )}
               <Absatz leise>
-                Hake während der Übung ab, was die Helfer:innen machen. Die Zeit seit dem Start wird mitgespeichert. Beim Beenden wird das
-                automatisch als Bewertung übernommen.
+                Hake während der Übung ab, was die Helfer:innen machen. Die Zeit seit dem Start wird mitgespeichert. Mit „Bewertung
+                abgeben“ speicherst du sie, ohne die Übung zu beenden – danach kann die nächste Person bewerten.
               </Absatz>
+              {d.bewertungen.length > 0 && (
+                <Text style={styles.bisher}>
+                  Bisher abgegeben: {d.bewertungen.length} ({d.bewertungen.map((b) => b.name.replace(' (live)', '')).join(', ')})
+                </Text>
+              )}
               <Karte stil={{ marginTop: abstand.m }}>
                 <Eingabe label="Wer bewertet live?" value={live.name} onChangeText={(t) => setzeLive({ name: t })} placeholder="Name" />
               </Karte>
@@ -167,6 +193,12 @@ export default function DurchgangScreen() {
                   placeholder="z.B. Notruf kam erst spät"
                 />
               </Karte>
+              <Knopf
+                titel={`✓ Bewertung abgeben (${liveAnzahl}/${d.checkliste.length})`}
+                art="tonal"
+                onPress={liveAbgeben}
+                deaktiviert={!liveHatInhalt}
+              />
             </>
           )}
 
@@ -243,6 +275,9 @@ function Reiter({ text, an, onPress }: { text: string; an: boolean; onPress: () 
 }
 
 const useStyles = macheStile((farben) => ({
+  gespeichert: { backgroundColor: farben.gruen, borderRadius: 12, padding: abstand.m, marginBottom: abstand.m },
+  gespeichertText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  bisher: { color: farben.textLeise, fontSize: 13, fontWeight: '700', marginTop: abstand.s },
   reiter: { flexDirection: 'row', backgroundColor: farben.karte, borderRadius: 14, padding: 4, gap: 4, marginBottom: abstand.m, ...kartenStil(farben) },
   reiterKnopf: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   reiterAn: { backgroundColor: farben.rot },

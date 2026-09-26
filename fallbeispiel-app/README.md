@@ -17,6 +17,7 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
     „messen“ (antippen) – so muss man wirklich nachfragen/messen.
 - **Timer** für den Durchgang, Bildschirm bleibt dabei an.
 - **Live-Bewertung** schon während der Übung (Reiter „Live-Bewertung“), mit Zeit seit Start für jeden Punkt.
+  Mit „✓ Bewertung abgeben“ speichern, ohne die Übung zu beenden – danach kann die nächste Person bewerten.
   Beim Beenden wird sie automatisch als Bewertung übernommen.
 - **Bewertung**: Jede:r Zuschauer:in hakt die Checkliste ab (Punkte, „WICHTIG“-Punkte) und kann Feedback schreiben.
 - **Ergebnis**: Prozent, Note, vergessene wichtige Punkte, Balken pro Prüfpunkt, Feedback –
