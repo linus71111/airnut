@@ -1,15 +1,12 @@
 import { createContext, useContext, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
-// Farben angelehnt an Rot und Gelb der DLRG – je einmal für hell und dunkel
+// Farben angelehnt an das Rot der DLRG – je einmal für hell und dunkel
 export type Farben = {
   dunkel: boolean;
   rot: string;
-  gelb: string;
-  /** Text auf Gelb */
-  aufGelb: string;
-  /** Roter Text auf Gelb */
-  rotAufGelb: string;
+  /** Zart rote Fläche für ruhige Knöpfe und Hinweise (Text darauf: rot) */
+  tonal: string;
   kopf: string;
   hintergrund: string;
   karte: string;
@@ -37,9 +34,7 @@ export type Farben = {
 export const HELL: Farben = {
   dunkel: false,
   rot: '#E2001A',
-  gelb: '#FFED00',
-  aufGelb: '#1A1A1A',
-  rotAufGelb: '#C8001A',
+  tonal: '#FCEBED',
   kopf: '#E2001A',
   hintergrund: '#F4F5F7',
   karte: '#FFFFFF',
@@ -65,9 +60,7 @@ export const HELL: Farben = {
 export const DUNKEL: Farben = {
   dunkel: true,
   rot: '#F0283C',
-  gelb: '#F5DF00',
-  aufGelb: '#1A1A1A',
-  rotAufGelb: '#C8001A',
+  tonal: '#3A1A20',
   kopf: '#B80016',
   hintergrund: '#0F1216',
   karte: '#1A1F26',
@@ -91,6 +84,19 @@ export const DUNKEL: Farben = {
 };
 
 export const abstand = { s: 6, m: 12, l: 18, xl: 24 };
+
+/** Weicher Schatten für Karten im hellen Modus, im dunklen Modus ein feiner Rand */
+export function kartenStil(farben: Farben) {
+  return farben.dunkel
+    ? { borderWidth: 1, borderColor: farben.rand }
+    : {
+        shadowColor: '#1A1A1A',
+        shadowOpacity: 0.07,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 2,
+      };
+}
 
 const FarbenContext = createContext<Farben>(HELL);
 export const FarbenProvider = FarbenContext.Provider;

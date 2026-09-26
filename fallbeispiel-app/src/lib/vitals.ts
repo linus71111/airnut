@@ -17,7 +17,7 @@ export type VitalDef = {
 export const VITAL_DEFS: VitalDef[] = [
   { key: 'puls', label: 'Puls', kurz: 'HF', einheit: '/min', min: 60, max: 100, schritt: 5, farbe: '#3DDC84' },
   { key: 'spo2', label: 'Sauerstoffsättigung', kurz: 'SpO₂', einheit: '%', min: 95, max: 100, schritt: 1, farbe: '#4FC3F7' },
-  { key: 'atemfrequenz', label: 'Atemfrequenz', kurz: 'AF', einheit: '/min', min: 12, max: 20, schritt: 2, farbe: '#FFD54F' },
+  { key: 'atemfrequenz', label: 'Atemfrequenz', kurz: 'AF', einheit: '/min', min: 12, max: 20, schritt: 2, farbe: '#E6EDF3' },
   { key: 'rrSys', label: 'Blutdruck systolisch', kurz: 'RR sys', einheit: 'mmHg', min: 100, max: 140, schritt: 5, farbe: '#FF8A80' },
   { key: 'rrDia', label: 'Blutdruck diastolisch', kurz: 'RR dia', einheit: 'mmHg', min: 60, max: 90, schritt: 5, farbe: '#FF8A80' },
   { key: 'blutzucker', label: 'Blutzucker', kurz: 'BZ', einheit: 'mg/dl', min: 70, max: 140, schritt: 5, farbe: '#CE93D8' },

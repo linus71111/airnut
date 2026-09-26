@@ -8,7 +8,7 @@ import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import { dauer, gesamt, note } from '../lib/score';
 import { useStore } from '../lib/store';
 import type { Schwierigkeit } from '../lib/types';
-import { abstand, macheStile, useFarben } from '../theme';
+import { abstand, kartenStil, macheStile, useFarben } from '../theme';
 
 export default function Verlauf() {
   const styles = useStyles();
@@ -112,20 +112,21 @@ function Chip({ text, an, onPress, farbe: eigeneFarbe }: { text: string; an: boo
 const useStyles = macheStile((farben) => ({
   leer: { textAlign: 'center', color: farben.textLeise, marginTop: 40, fontSize: 16 },
   zahlen: { flexDirection: 'row', gap: abstand.s, marginBottom: abstand.m },
-  zahl: { flex: 1, backgroundColor: farben.karte, borderRadius: 14, paddingVertical: abstand.m, alignItems: 'center' },
+  zahl: { flex: 1, backgroundColor: farben.karte, borderRadius: 16, paddingVertical: abstand.m, alignItems: 'center', ...kartenStil(farben) },
   zahlWert: { fontSize: 26, fontWeight: '900', color: farben.text, fontVariant: ['tabular-nums'] },
   zahlLabel: { fontSize: 12, color: farben.textLeise, fontWeight: '700' },
   filter: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },
-  chip: { borderWidth: 2, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 5 },
+  chip: { borderWidth: 1.5, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 5 },
   chipText: { fontSize: 14, fontWeight: '800' },
   eintrag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: abstand.m,
     backgroundColor: farben.karte,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: abstand.l,
     marginBottom: abstand.m,
+    ...kartenStil(farben),
   },
   titel: { fontSize: 16, fontWeight: '800', color: farben.text },
   meta: { fontSize: 13, color: farben.textLeise, lineHeight: 19 },

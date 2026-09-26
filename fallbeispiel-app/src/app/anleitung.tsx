@@ -126,9 +126,9 @@ export default function Anleitung() {
 }
 
 const useStyles = macheStile((farben) => ({
-  intro: { backgroundColor: farben.gelb, borderRadius: 16, padding: abstand.l, marginBottom: abstand.m },
-  introTitel: { fontSize: 22, fontWeight: '900', color: farben.rotAufGelb },
-  introText: { fontSize: 15, lineHeight: 21, color: farben.aufGelb, marginTop: 4 },
+  intro: { backgroundColor: farben.rot, borderRadius: 22, padding: abstand.l, marginBottom: abstand.m },
+  introTitel: { fontSize: 22, fontWeight: '900', color: '#fff', letterSpacing: -0.3 },
+  introText: { fontSize: 15, lineHeight: 21, color: 'rgba(255,255,255,0.92)', marginTop: 4 },
   rolle: { marginBottom: abstand.m },
   rolleName: { fontSize: 15, fontWeight: '800', color: farben.rot, marginBottom: 2 },
   schritt: { flexDirection: 'row', gap: abstand.m, marginBottom: abstand.m },

@@ -76,7 +76,7 @@ export default function FallDetail() {
         <SchwierigkeitBadge stufe={f.schwierigkeit} />
       </View>
 
-      <Karte stil={{ borderLeftWidth: 5, borderLeftColor: farben.gelb }}>
+      <Karte>
         <Ueberschrift>📢 Lage (vorlesen)</Ueberschrift>
         <Absatz>{f.lage}</Absatz>
       </Karte>
@@ -209,14 +209,14 @@ const useStyles = macheStile((farben) => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: farben.gelb,
+    backgroundColor: farben.tonal,
     borderRadius: 12,
     paddingHorizontal: abstand.m,
     paddingVertical: 10,
     marginBottom: abstand.m,
   },
-  zufallText: { color: farben.aufGelb, fontWeight: '800', fontSize: 15 },
-  zufallKnopf: { color: farben.rotAufGelb, fontWeight: '900', fontSize: 15 },
+  zufallText: { color: farben.text, fontWeight: '800', fontSize: 15 },
+  zufallKnopf: { color: farben.rot, fontWeight: '900', fontSize: 15 },
   alleAn: { color: farben.rot, fontWeight: '800' },
   label: { fontSize: 13, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },

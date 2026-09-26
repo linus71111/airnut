@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Eingabe, Karte, Knopf } from '../../components/ui';
 import { akte, neueId, note } from '../../lib/score';
 import { useStore } from '../../lib/store';
-import { abstand, macheStile } from '../../theme';
+import { abstand, kartenStil, macheStile } from '../../theme';
 
 export default function Personen() {
   const styles = useStyles();
@@ -70,12 +70,13 @@ const useStyles = macheStile((farben) => ({
     alignItems: 'center',
     gap: abstand.m,
     backgroundColor: farben.karte,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: abstand.m,
     marginBottom: abstand.s,
+    ...kartenStil(farben),
   },
-  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: farben.gelb, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 18, fontWeight: '900', color: farben.rotAufGelb },
+  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: farben.tonal, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: 18, fontWeight: '900', color: farben.rot },
   name: { fontSize: 16, fontWeight: '800', color: farben.text },
   meta: { fontSize: 13, color: farben.textLeise, marginTop: 2 },
   wert: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },

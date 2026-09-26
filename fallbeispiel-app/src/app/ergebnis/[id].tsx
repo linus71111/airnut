@@ -125,7 +125,7 @@ export default function Ergebnis() {
         </Karte>
       )}
 
-      <Knopf titel="Ergebnis teilen (z.B. WhatsApp)" art="gelb" onPress={() => Share.share({ message: alsText(d) }).catch(() => {})} />
+      <Knopf titel="Ergebnis teilen (z.B. WhatsApp)" art="tonal" onPress={() => Share.share({ message: alsText(d) }).catch(() => {})} />
     </ScrollView>
   );
 }

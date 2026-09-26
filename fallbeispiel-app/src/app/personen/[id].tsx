@@ -7,7 +7,7 @@ import { bestaetigen } from '../../lib/bestaetigen';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../../lib/schwierigkeit';
 import { akte, note } from '../../lib/score';
 import { useStore } from '../../lib/store';
-import { abstand, macheStile, useFarben } from '../../theme';
+import { abstand, kartenStil, macheStile, useFarben } from '../../theme';
 
 export default function PersonAkte() {
   const styles = useStyles();
@@ -145,12 +145,12 @@ function Zahl({ wert, label, farbe }: { wert: string; label: string; farbe?: str
 
 const useStyles = macheStile((farben) => ({
   kopf: { flexDirection: 'row', alignItems: 'center', gap: abstand.m, marginBottom: abstand.m },
-  avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: farben.gelb, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 26, fontWeight: '900', color: farben.rotAufGelb },
+  avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: farben.tonal, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: 26, fontWeight: '900', color: farben.rot },
   name: { fontSize: 24, fontWeight: '900', color: farben.text },
   seit: { fontSize: 13, color: farben.textLeise },
   zahlen: { flexDirection: 'row', gap: abstand.s, marginBottom: abstand.m },
-  zahl: { flex: 1, backgroundColor: farben.karte, borderRadius: 14, paddingVertical: abstand.m, alignItems: 'center' },
+  zahl: { flex: 1, backgroundColor: farben.karte, borderRadius: 16, paddingVertical: abstand.m, alignItems: 'center', ...kartenStil(farben) },
   zahlWert: { fontSize: 24, fontWeight: '900', color: farben.text, fontVariant: ['tabular-nums'] },
   zahlLabel: { fontSize: 12, color: farben.textLeise, fontWeight: '700' },
   zeile: { flexDirection: 'row', justifyContent: 'space-between' },

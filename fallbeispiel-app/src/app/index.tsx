@@ -1,14 +1,14 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge, Knopf, SchwierigkeitBadge } from '../components/ui';
+import { Badge, SchwierigkeitBadge } from '../components/ui';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
-import type { Schwierigkeit } from '../lib/types';
 import { useStore } from '../lib/store';
+import type { Schwierigkeit } from '../lib/types';
 import { oeffneZufallsFall } from '../lib/zufall';
-import { abstand, macheStile, useFarben } from '../theme';
+import { abstand, kartenStil, macheStile, useFarben } from '../theme';
 
 export default function Start() {
   const styles = useStyles();
@@ -31,36 +31,64 @@ export default function Start() {
       data={gefiltert}
       keyExtractor={(f) => f.id}
       contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}
+      keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View>
-          <View style={styles.banner}>
-            <Text style={styles.bannerTitel}>Fallbeispiel-Trainer</Text>
-            <Text style={styles.bannerText}>
-              Spielt realistische Notfälle nach. Die Spielleitung steuert die Vitalwerte, die Zuschauer:innen bewerten mit der
-              Checkliste.
+          <View style={styles.hero}>
+            <View style={styles.heroZeile}>
+              <View style={styles.heroIcon}>
+                <Text style={styles.heroIconText}>🛟</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.heroTitel}>Fallbeispiel-Trainer</Text>
+                <Text style={styles.heroUnter}>Jugend-Einsatz-Team</Text>
+              </View>
+            </View>
+            <Text style={styles.heroText}>
+              Notfälle realistisch nachspielen, Vitalwerte ansagen und gemeinsam mit der Checkliste bewerten.
             </Text>
+            <View style={styles.heroZahlen}>
+              <Zahl wert={faelle.length} text="Fälle" />
+              <View style={styles.heroTrenner} />
+              <Zahl wert={durchgaenge.length} text="Einsätze" />
+              <View style={styles.heroTrenner} />
+              <Zahl wert={personen.length} text="Helfer" />
+            </View>
           </View>
 
           {laufend.map((d) => (
-            <Pressable key={d.id} style={styles.laufend} onPress={() => router.push(`/durchgang/${d.id}`)}>
-              <Text style={styles.laufendText}>▶ Läuft: {d.fallTitel} – Team „{d.team}“</Text>
+            <Pressable
+              key={d.id}
+              style={({ pressed }) => [styles.laufend, pressed && { opacity: 0.85 }]}
+              onPress={() => router.push(`/durchgang/${d.id}`)}>
+              <View style={styles.laufendPunkt} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.laufendTitel}>Übung läuft</Text>
+                <Text style={styles.laufendText} numberOfLines={1}>
+                  {d.fallTitel} · {d.team}
+                </Text>
+              </View>
+              <Text style={styles.laufendPfeil}>›</Text>
             </Pressable>
           ))}
 
-          <View style={styles.knoepfe}>
-            <Knopf titel="📖 Anleitung" art="gelb" onPress={() => router.push('/anleitung')} stil={styles.halb} />
-            <Knopf titel={`👥 Helfer (${personen.length})`} art="sekundaer" onPress={() => router.push('/personen')} stil={styles.halb} />
-            <Knopf titel={`📋 Einsätze (${durchgaenge.length})`} art="sekundaer" onPress={() => router.push('/verlauf')} stil={styles.halb} />
-            <Knopf titel="+ Eigener Fall" onPress={() => router.push('/editor')} stil={styles.halb} />
+          <View style={styles.kacheln}>
+            <Kachel icon="📖" text="Anleitung" ziel="/anleitung" />
+            <Kachel icon="👥" text="Helfer" ziel="/personen" />
+            <Kachel icon="📋" text="Einsätze" ziel="/verlauf" />
+            <Kachel icon="➕" text="Neuer Fall" ziel="/editor" />
           </View>
 
-          <TextInput
-            value={suche}
-            onChangeText={setSuche}
-            placeholder="Fallbeispiel suchen …"
-            placeholderTextColor={farben.platzhalter}
-            style={styles.suche}
-          />
+          <View style={styles.suche}>
+            <Text style={styles.sucheIcon}>🔍</Text>
+            <TextInput
+              value={suche}
+              onChangeText={setSuche}
+              placeholder="Fallbeispiel suchen"
+              placeholderTextColor={farben.platzhalter}
+              style={styles.sucheFeld}
+            />
+          </View>
 
           <View style={styles.filter}>
             <FilterChip text="Alle" an={!stufe} farbe={farben.neutral} onPress={() => setStufe(null)} />
@@ -75,31 +103,70 @@ export default function Start() {
             ))}
           </View>
 
-          <Knopf
-            titel={`🎲 Zufallsfall${stufe ? ` (${SCHWIERIGKEIT_INFO[stufe].label})` : ''}`}
-            art="sekundaer"
+          <Pressable
+            accessibilityRole="button"
             onPress={() => oeffneZufallsFall(faelle, stufe ?? undefined)}
-            stil={{ marginBottom: abstand.m }}
-          />
+            style={({ pressed }) => [styles.zufall, pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] }]}>
+            <Text style={styles.zufallIcon}>🎲</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.zufallTitel}>Zufallsfall</Text>
+              <Text style={styles.zufallText}>
+                {stufe ? `Ein zufälliger Fall der Stufe „${SCHWIERIGKEIT_INFO[stufe].label}“` : 'Die App wählt einen Fall für euch aus'}
+              </Text>
+            </View>
+            <Text style={styles.zufallPfeil}>›</Text>
+          </Pressable>
+
+          <Text style={styles.abschnitt}>
+            Fallbeispiele <Text style={styles.abschnittZahl}>{gefiltert.length}</Text>
+          </Text>
         </View>
       }
       renderItem={({ item }) => (
         <Pressable
           onPress={() => router.push(`/fall/${item.id}`)}
-          style={({ pressed }) => [styles.fall, pressed && { opacity: 0.7 }]}>
+          style={({ pressed }) => [styles.fall, pressed && { opacity: 0.8, transform: [{ scale: 0.99 }] }]}>
           <View style={styles.fallKopf}>
             <Text style={styles.fallTitel}>{item.titel}</Text>
-            <View style={{ gap: 4, alignItems: 'flex-end' }}>
-              <SchwierigkeitBadge stufe={item.schwierigkeit} />
-              {item.eigenes && <Badge text="EIGENER" farbe="#1565C0" />}
-            </View>
+            <Text style={styles.fallPfeil}>›</Text>
           </View>
           <Text style={styles.fallKurz}>{item.kurz}</Text>
-          <Text style={styles.fallMeta}>{item.checkliste.length} Prüfpunkte</Text>
+          <View style={styles.fallFuss}>
+            <SchwierigkeitBadge stufe={item.schwierigkeit} />
+            {item.eigenes && <Badge text="EIGENER" farbe="#1565C0" />}
+            <Text style={styles.fallMeta}>{item.checkliste.length} Prüfpunkte</Text>
+          </View>
         </Pressable>
       )}
-      ListEmptyComponent={<Text style={{ color: farben.textLeise, textAlign: 'center' }}>Nichts gefunden.</Text>}
+      ListEmptyComponent={<Text style={styles.leer}>Kein Fallbeispiel gefunden.</Text>}
     />
+  );
+}
+
+function Zahl({ wert, text }: { wert: number; text: string }) {
+  const styles = useStyles();
+  return (
+    <View style={styles.zahl}>
+      <Text style={styles.zahlWert}>{wert}</Text>
+      <Text style={styles.zahlText}>{text}</Text>
+    </View>
+  );
+}
+
+function Kachel({ icon, text, ziel }: { icon: string; text: string; ziel: Href }) {
+  const styles = useStyles();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push(ziel)}
+      style={({ pressed }) => [styles.kachel, pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] }]}>
+      <View style={styles.kachelIcon}>
+        <Text style={styles.kachelIconText}>{icon}</Text>
+      </View>
+      <Text style={styles.kachelText} numberOfLines={1}>
+        {text}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -109,42 +176,113 @@ function FilterChip({ text, an, farbe, onPress }: { text: string; an: boolean; f
     <Pressable
       onPress={onPress}
       accessibilityState={{ selected: an }}
-      style={[styles.chip, { borderColor: farbe }, an && { backgroundColor: farbe }]}>
+      style={[styles.chip, { borderColor: an ? farbe : 'transparent' }, an && { backgroundColor: farbe }]}>
       <Text style={[styles.chipText, { color: an ? '#fff' : farbe }]}>{text}</Text>
     </Pressable>
   );
 }
 
 const useStyles = macheStile((farben) => ({
-  halb: { flexGrow: 1, flexBasis: '45%' },
-  filter: { flexDirection: 'row', gap: 8, marginBottom: abstand.m, flexWrap: 'wrap' },
-  chip: { borderWidth: 2, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 6 },
-  chipText: { fontSize: 14, fontWeight: '800' },
-  banner: { backgroundColor: farben.gelb, borderRadius: 16, padding: abstand.l, marginBottom: abstand.m },
-  bannerTitel: { fontSize: 22, fontWeight: '900', color: farben.rotAufGelb },
-  bannerText: { fontSize: 15, lineHeight: 21, color: farben.aufGelb, marginTop: 4 },
-  laufend: { backgroundColor: farben.gruen, borderRadius: 12, padding: 14, marginBottom: abstand.m },
-  laufendText: { color: '#fff', fontWeight: '800', fontSize: 15 },
-  knoepfe: { flexDirection: 'row', flexWrap: 'wrap', gap: abstand.s, marginBottom: abstand.m },
+  hero: { backgroundColor: farben.rot, borderRadius: 22, padding: abstand.l, marginBottom: abstand.m, gap: abstand.m },
+  heroZeile: { flexDirection: 'row', alignItems: 'center', gap: abstand.m },
+  heroIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroIconText: { fontSize: 26 },
+  heroTitel: { color: '#fff', fontSize: 22, fontWeight: '900', letterSpacing: -0.3 },
+  heroUnter: { color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8 },
+  heroText: { color: 'rgba(255,255,255,0.92)', fontSize: 15, lineHeight: 21 },
+  heroZahlen: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.12)',
+    borderRadius: 14,
+    paddingVertical: 10,
+  },
+  heroTrenner: { width: 1, alignSelf: 'stretch', backgroundColor: 'rgba(255,255,255,0.25)' },
+  zahl: { flex: 1, alignItems: 'center' },
+  zahlWert: { color: '#fff', fontSize: 20, fontWeight: '900', fontVariant: ['tabular-nums'] },
+  zahlText: { color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '600' },
+  laufend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: abstand.m,
+    backgroundColor: farben.gruen,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: abstand.m,
+  },
+  laufendPunkt: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff' },
+  laufendTitel: { color: '#fff', fontWeight: '900', fontSize: 15 },
+  laufendText: { color: 'rgba(255,255,255,0.9)', fontSize: 14 },
+  laufendPfeil: { color: '#fff', fontSize: 26, fontWeight: '300' },
+  kacheln: { flexDirection: 'row', gap: abstand.s, marginBottom: abstand.l },
+  kachel: {
+    flex: 1,
+    backgroundColor: farben.karte,
+    borderRadius: 16,
+    paddingVertical: abstand.m,
+    alignItems: 'center',
+    gap: 6,
+    ...kartenStil(farben),
+  },
+  kachelIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: farben.tonal, alignItems: 'center', justifyContent: 'center' },
+  kachelIconText: { fontSize: 20 },
+  kachelText: { fontSize: 12, fontWeight: '700', color: farben.text },
   suche: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: farben.eingabe,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: farben.rand,
-    padding: 12,
-    fontSize: 16,
+    paddingHorizontal: 12,
     marginBottom: abstand.m,
   },
+  sucheIcon: { fontSize: 15, opacity: 0.6 },
+  sucheFeld: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, fontSize: 16, color: farben.text },
+  filter: { flexDirection: 'row', gap: 8, marginBottom: abstand.m, flexWrap: 'wrap' },
+  chip: { borderWidth: 1.5, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: farben.karte },
+  chipText: { fontSize: 14, fontWeight: '800' },
+  zufall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: abstand.m,
+    backgroundColor: farben.tonal,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: abstand.l,
+  },
+  zufallIcon: { fontSize: 26 },
+  zufallTitel: { color: farben.rot, fontWeight: '900', fontSize: 16 },
+  zufallText: { color: farben.textLeise, fontSize: 13, marginTop: 1 },
+  zufallPfeil: { color: farben.rot, fontSize: 26, fontWeight: '300' },
+  abschnitt: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: farben.textLeise,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: abstand.s,
+  },
+  abschnittZahl: { color: farben.rot },
   fall: {
     backgroundColor: farben.karte,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: abstand.l,
     marginBottom: abstand.m,
-    borderLeftWidth: 5,
-    borderLeftColor: farben.rot,
+    ...kartenStil(farben),
   },
   fallKopf: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' },
-  fallTitel: { fontSize: 17, fontWeight: '800', color: farben.text, flex: 1 },
-  fallKurz: { fontSize: 15, color: farben.textLeise, marginTop: 4 },
-  fallMeta: { fontSize: 12, color: farben.rot, fontWeight: '700', marginTop: 8 },
+  fallTitel: { fontSize: 17, fontWeight: '800', color: farben.text, flex: 1, letterSpacing: -0.2 },
+  fallPfeil: { color: farben.textLeise, fontSize: 24, fontWeight: '300', marginTop: -4 },
+  fallKurz: { fontSize: 15, lineHeight: 21, color: farben.textLeise, marginTop: 4 },
+  fallFuss: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: abstand.m },
+  fallMeta: { fontSize: 12, color: farben.textLeise, fontWeight: '700' },
+  leer: { color: farben.textLeise, textAlign: 'center', marginTop: abstand.l },
 }));

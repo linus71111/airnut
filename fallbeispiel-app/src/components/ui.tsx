@@ -3,9 +3,9 @@ import { Pressable, Switch, Text, TextInput, View, type SwitchProps, type TextIn
 
 import { SCHWIERIGKEIT_INFO } from '../lib/schwierigkeit';
 import type { Schwierigkeit } from '../lib/types';
-import { abstand, macheStile, useFarben } from '../theme';
+import { abstand, kartenStil, macheStile, useFarben } from '../theme';
 
-type ButtonArt = 'primaer' | 'sekundaer' | 'gefahr' | 'gelb';
+type ButtonArt = 'primaer' | 'sekundaer' | 'gefahr' | 'tonal';
 
 export function Knopf({
   titel,
@@ -22,8 +22,8 @@ export function Knopf({
 }) {
   const styles = useStyles();
   const farben = useFarben();
-  const hg = { primaer: farben.rot, sekundaer: farben.karte, gefahr: farben.gefahr, gelb: farben.gelb }[art];
-  const fg = art === 'sekundaer' ? farben.rot : art === 'gelb' ? farben.aufGelb : '#fff';
+  const hg = { primaer: farben.rot, sekundaer: farben.karte, gefahr: farben.gefahr, tonal: farben.tonal }[art];
+  const fg = art === 'sekundaer' || art === 'tonal' ? farben.rot : '#fff';
   return (
     <Pressable
       accessibilityRole="button"
@@ -31,8 +31,9 @@ export function Knopf({
       onPress={onPress}
       style={({ pressed }) => [
         styles.knopf,
-        { backgroundColor: hg, opacity: deaktiviert ? 0.4 : pressed ? 0.8 : 1 },
-        art === 'sekundaer' && { borderWidth: 2, borderColor: farben.rot },
+        { backgroundColor: hg, opacity: deaktiviert ? 0.4 : 1 },
+        pressed && !deaktiviert && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+        art === 'sekundaer' && { borderWidth: 1.5, borderColor: farben.rot },
         stil,
       ]}>
       <Text style={[styles.knopfText, { color: fg }]}>{titel}</Text>
@@ -95,24 +96,23 @@ export function Badge({ text, farbe: eigeneFarbe }: { text: string; farbe?: stri
 }
 
 const useStyles = macheStile((farben) => ({
-  knopf: { paddingVertical: 14, paddingHorizontal: 18, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  knopf: { paddingVertical: 14, paddingHorizontal: 18, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   knopfText: { fontSize: 16, fontWeight: '700' },
   karte: {
     backgroundColor: farben.karte,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: abstand.l,
     marginBottom: abstand.m,
-    borderWidth: 1,
-    borderColor: farben.rand,
+    ...kartenStil(farben),
   },
-  ueberschrift: { fontSize: 18, fontWeight: '800', color: farben.text, marginBottom: abstand.s },
+  ueberschrift: { fontSize: 18, fontWeight: '800', color: farben.text, marginBottom: abstand.s, letterSpacing: -0.2 },
   absatz: { fontSize: 15, lineHeight: 22, color: farben.text },
-  label: { fontSize: 13, fontWeight: '700', color: farben.textLeise, marginBottom: 4, textTransform: 'uppercase' },
+  label: { fontSize: 12, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.6 },
   eingabe: {
     backgroundColor: farben.eingabe,
     borderWidth: 1,
     borderColor: farben.rand,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
     fontSize: 16,
     color: farben.text,

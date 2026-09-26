@@ -14,7 +14,7 @@ import { useStore } from '../../lib/store';
 import { useToene } from '../../lib/toene';
 import type { Durchgang, LiveBewertung, Vitalwerte } from '../../lib/types';
 import { NORMALWERTE } from '../../lib/vitals';
-import { abstand, macheStile, useFarben } from '../../theme';
+import { abstand, kartenStil, macheStile, useFarben } from '../../theme';
 
 export default function DurchgangScreen() {
   const styles = useStyles();
@@ -143,7 +143,7 @@ export default function DurchgangScreen() {
                 <View style={styles.knoepfe}>
                   <Knopf titel="Ausgangswerte" art="sekundaer" onPress={() => setWerte(f.vitalStart)} stil={{ flex: 1 }} />
                   {f.vitalNachBehandlung && (
-                    <Knopf titel="Nach Behandlung" art="gelb" onPress={() => setWerte(f.vitalNachBehandlung!)} stil={{ flex: 1 }} />
+                    <Knopf titel="Nach Behandlung" art="tonal" onPress={() => setWerte(f.vitalNachBehandlung!)} stil={{ flex: 1 }} />
                   )}
                 </View>
               )}
@@ -205,7 +205,7 @@ export default function DurchgangScreen() {
 
           <Knopf
             titel="🏆 Ergebnis anzeigen"
-            art="gelb"
+            art="tonal"
             deaktiviert={d.bewertungen.length === 0}
             onPress={() => router.push(`/ergebnis/${d.id}`)}
           />
@@ -243,24 +243,25 @@ function Reiter({ text, an, onPress }: { text: string; an: boolean; onPress: () 
 }
 
 const useStyles = macheStile((farben) => ({
-  reiter: { flexDirection: 'row', backgroundColor: farben.karte, borderRadius: 12, padding: 4, gap: 4, marginBottom: abstand.m },
+  reiter: { flexDirection: 'row', backgroundColor: farben.karte, borderRadius: 14, padding: 4, gap: 4, marginBottom: abstand.m, ...kartenStil(farben) },
   reiterKnopf: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   reiterAn: { backgroundColor: farben.rot },
   reiterText: { fontSize: 14, fontWeight: '800', color: farben.text, textAlign: 'center' },
-  timer: { backgroundColor: farben.rot, borderRadius: 16, padding: abstand.l, alignItems: 'center', marginBottom: abstand.m },
-  timerLabel: { color: farben.gelb, fontWeight: '900', letterSpacing: 2, fontSize: 13 },
+  timer: { backgroundColor: farben.rot, borderRadius: 22, padding: abstand.l, alignItems: 'center', marginBottom: abstand.m },
+  timerLabel: { color: 'rgba(255,255,255,0.85)', fontWeight: '900', letterSpacing: 2, fontSize: 13 },
   timerZeit: { color: '#fff', fontSize: 56, fontWeight: '900', fontVariant: ['tabular-nums'] },
   timerFall: { color: '#fff', fontSize: 15, textAlign: 'center' },
-  limit: { backgroundColor: farben.gelb, borderRadius: 12, padding: abstand.m, marginBottom: abstand.m, alignItems: 'center' },
-  limitText: { color: farben.aufGelb, fontWeight: '900', fontSize: 16 },
+  limit: { backgroundColor: farben.orange, borderRadius: 12, padding: abstand.m, marginBottom: abstand.m, alignItems: 'center' },
+  limitText: { color: '#fff', fontWeight: '900', fontSize: 16 },
   zeile: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: abstand.m,
     backgroundColor: farben.karte,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: abstand.m,
     marginBottom: abstand.m,
+    ...kartenStil(farben),
   },
   schalterTitel: { fontSize: 16, fontWeight: '800', color: farben.text },
   schalterText: { fontSize: 13, color: farben.textLeise },
