@@ -1,17 +1,17 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Absatz, Badge, Karte, Knopf, Ueberschrift } from '../../components/ui';
 import { dauer, gesamt, note } from '../../lib/score';
 import { useStore } from '../../lib/store';
 import type { Durchgang } from '../../lib/types';
-import { abstand, farben } from '../../theme';
+import { abstand, macheStile, useFarben, type Farben } from '../../theme';
 
-function balkenFarbe(anteil: number) {
+function balkenFarbe(anteil: number, farben: Farben) {
   if (anteil >= 0.75) return farben.gruen;
-  if (anteil >= 0.5) return '#D18B00';
-  return '#C62828';
+  if (anteil >= 0.5) return farben.orange;
+  return farben.fehler;
 }
 
 /** Frühester Zeitpunkt, zu dem ein Punkt live abgehakt wurde */
@@ -39,6 +39,8 @@ function alsText(d: Durchgang): string {
 }
 
 export default function Ergebnis() {
+  const styles = useStyles();
+  const farben = useFarben();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { durchgang, person } = useStore();
   const d = durchgang(id);
@@ -78,7 +80,7 @@ export default function Ergebnis() {
       )}
 
       {kritischVergessen.length > 0 && (
-        <Karte stil={{ borderColor: '#C62828', borderWidth: 2 }}>
+        <Karte stil={{ borderColor: farben.fehler, borderWidth: 2 }}>
           <Ueberschrift>⚠️ Wichtige Punkte vergessen</Ueberschrift>
           {kritischVergessen.map((c) => (
             <Absatz key={c.id}>• {c.text}</Absatz>
@@ -101,7 +103,7 @@ export default function Ergebnis() {
                 {c.kritisch && <Badge text="WICHTIG" />}
               </View>
               <View style={styles.balkenHg}>
-                <View style={[styles.balken, { width: `${Math.round(anteil * 100)}%`, backgroundColor: balkenFarbe(anteil) }]} />
+                <View style={[styles.balken, { width: `${Math.round(anteil * 100)}%`, backgroundColor: balkenFarbe(anteil, farben) }]} />
               </View>
               <Text style={styles.anteil}>
                 {Math.round(anteil * 100)}%{z !== undefined ? `  ·  ⏱ nach ${dauer(z)}` : ''}
@@ -128,7 +130,7 @@ export default function Ergebnis() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   kopf: { borderRadius: 18, padding: abstand.xl, alignItems: 'center', marginBottom: abstand.m },
   prozent: { color: '#fff', fontSize: 64, fontWeight: '900' },
   note: { color: '#fff', fontSize: 22, fontWeight: '800' },
@@ -136,11 +138,11 @@ const styles = StyleSheet.create({
   punkt: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: farben.rand },
   punktKopf: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   punktText: { flex: 1, fontSize: 15, lineHeight: 21, color: farben.text },
-  balkenHg: { height: 8, backgroundColor: '#E8EAED', borderRadius: 4, marginTop: 6, overflow: 'hidden' },
+  balkenHg: { height: 8, backgroundColor: farben.balkenHg, borderRadius: 4, marginTop: 6, overflow: 'hidden' },
   balken: { height: 8, borderRadius: 4 },
   anteil: { fontSize: 12, color: farben.textLeise, marginTop: 2 },
   feedbackName: { fontWeight: '800', color: farben.text },
   helfer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },
   helferChip: { backgroundColor: farben.karte, borderColor: farben.rot, borderWidth: 2, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6 },
   helferText: { color: farben.rot, fontWeight: '800' },
-});
+}));

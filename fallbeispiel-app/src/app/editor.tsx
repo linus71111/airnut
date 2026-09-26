@@ -1,15 +1,15 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Absatz, Eingabe, Karte, Knopf, Ueberschrift } from '../components/ui';
+import { Absatz, Eingabe, Karte, Knopf, Ueberschrift, Umschalter } from '../components/ui';
 import { neueId } from '../lib/score';
 import { useStore } from '../lib/store';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import type { CheckItem, Fallbeispiel, Kategorie, Vitalwerte } from '../lib/types';
 import { BEWUSSTSEIN_STUFEN, NORMALWERTE, VITAL_DEFS } from '../lib/vitals';
-import { abstand, farben } from '../theme';
+import { abstand, macheStile, useFarben } from '../theme';
 
 const KATEGORIEN: Kategorie[] = ['Eigenschutz', 'Erstkontakt', 'Notruf', 'Maßnahmen', 'Betreuung', 'Übergabe'];
 
@@ -31,6 +31,8 @@ const LEERER_FALL: Fallbeispiel = {
 };
 
 export default function Editor() {
+  const styles = useStyles();
+  const farben = useFarben();
   const { id, vorlage } = useLocalSearchParams<{ id?: string; vorlage?: string }>();
   const { fall, speichereFall } = useStore();
   const insets = useSafeAreaInsets();
@@ -84,10 +86,9 @@ export default function Editor() {
       <Karte>
         <View style={styles.zeile}>
           <Ueberschrift>Werte nach Behandlung</Ueberschrift>
-          <Switch
+          <Umschalter
             value={!!f.vitalNachBehandlung}
             onValueChange={(an) => setze('vitalNachBehandlung', an ? { ...f.vitalStart } : undefined)}
-            trackColor={{ true: farben.rot }}
           />
         </View>
         {f.vitalNachBehandlung ? (
@@ -104,7 +105,7 @@ export default function Editor() {
             value={c.text}
             onChangeText={(t) => setzePunkt(i, { text: t })}
             placeholder="Was soll gemacht werden?"
-            placeholderTextColor="#999"
+            placeholderTextColor={farben.platzhalter}
             multiline
             style={styles.punktEingabe}
           />
@@ -121,7 +122,7 @@ export default function Editor() {
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Text style={styles.klein}>Wichtig</Text>
-              <Switch value={!!c.kritisch} onValueChange={(v) => setzePunkt(i, { kritisch: v || undefined })} trackColor={{ true: farben.rot }} />
+              <Umschalter value={!!c.kritisch} onValueChange={(v) => setzePunkt(i, { kritisch: v || undefined })} />
             </View>
           </View>
           <Pressable onPress={() => setze('checkliste', f.checkliste.filter((_, j) => j !== i))} style={{ marginTop: abstand.s }}>
@@ -142,6 +143,7 @@ export default function Editor() {
 }
 
 function VitalEditor({ werte, onChange }: { werte: Vitalwerte; onChange: (w: Vitalwerte) => void }) {
+  const styles = useStyles();
   return (
     <View>
       <View style={styles.raster}>
@@ -170,6 +172,7 @@ function VitalEditor({ werte, onChange }: { werte: Vitalwerte; onChange: (w: Vit
 
 /** Zahleneingabe, die auch Komma akzeptiert und Zwischenstände wie "36," erlaubt */
 function ZahlFeld({ wert, onWert }: { wert: number; onWert: (v: number) => void }) {
+  const styles = useStyles();
   const [text, setText] = useState(String(wert).replace('.', ','));
   return (
     <TextInput
@@ -186,6 +189,8 @@ function ZahlFeld({ wert, onWert }: { wert: number; onWert: (v: number) => void 
 }
 
 function Chip({ text, an, onPress }: { text: string; an: boolean; onPress: () => void }) {
+  const styles = useStyles();
+  const farben = useFarben();
   return (
     <Pressable onPress={onPress} style={[styles.chip, an && { backgroundColor: farben.rot, borderColor: farben.rot }]}>
       <Text style={[styles.chipText, an && { color: '#fff' }]}>{text}</Text>
@@ -193,7 +198,7 @@ function Chip({ text, an, onPress }: { text: string; an: boolean; onPress: () =>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   zeile: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: abstand.s },
   raster: { flexDirection: 'row', flexWrap: 'wrap', gap: abstand.m },
   feld: { flexBasis: '45%', flexGrow: 1 },
@@ -206,13 +211,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: farben.text,
-    backgroundColor: '#fff',
+    backgroundColor: farben.eingabe,
     marginTop: 4,
   },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
-  chip: { borderWidth: 1, borderColor: farben.rand, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: '#fff' },
+  chip: { borderWidth: 1, borderColor: farben.rand, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: farben.eingabe },
   chipText: { fontSize: 13, color: farben.text, fontWeight: '600' },
   punktEingabe: { fontSize: 16, color: farben.text, borderBottomWidth: 1, borderBottomColor: farben.rand, paddingVertical: 6 },
-  entfernen: { color: '#C62828', fontWeight: '700' },
-  fehler: { color: '#C62828', marginTop: abstand.m, fontWeight: '700' },
-});
+  entfernen: { color: farben.fehler, fontWeight: '700' },
+  fehler: { color: farben.fehler, marginTop: abstand.m, fontWeight: '700' },
+}));

@@ -1,10 +1,10 @@
 import { Stack } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Absatz, Karte, Ueberschrift } from '../components/ui';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
-import { abstand, farben } from '../theme';
+import { abstand, macheStile, useFarben } from '../theme';
 
 const ROLLEN: [string, string][] = [
   ['Spielleitung', 'Hat das Handy mit der App, liest die Lage vor, steuert die Vitalwerte und achtet auf die Sicherheit.'],
@@ -54,6 +54,8 @@ const SICHERHEIT = [
 ];
 
 export default function Anleitung() {
+  const styles = useStyles();
+  const farben = useFarben();
   const insets = useSafeAreaInsets();
   return (
     <ScrollView contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}>
@@ -123,10 +125,10 @@ export default function Anleitung() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   intro: { backgroundColor: farben.gelb, borderRadius: 16, padding: abstand.l, marginBottom: abstand.m },
-  introTitel: { fontSize: 22, fontWeight: '900', color: farben.rot },
-  introText: { fontSize: 15, lineHeight: 21, color: farben.text, marginTop: 4 },
+  introTitel: { fontSize: 22, fontWeight: '900', color: farben.rotAufGelb },
+  introText: { fontSize: 15, lineHeight: 21, color: farben.aufGelb, marginTop: 4 },
   rolle: { marginBottom: abstand.m },
   rolleName: { fontSize: 15, fontWeight: '800', color: farben.rot, marginBottom: 2 },
   schritt: { flexDirection: 'row', gap: abstand.m, marginBottom: abstand.m },
@@ -136,4 +138,4 @@ const styles = StyleSheet.create({
   stufe: { flexDirection: 'row', gap: abstand.s, alignItems: 'flex-start', marginBottom: abstand.s },
   punkt: { width: 12, height: 12, borderRadius: 6, marginTop: 5 },
   stufeText: { flex: 1, fontSize: 15, lineHeight: 22, color: farben.text },
-});
+}));

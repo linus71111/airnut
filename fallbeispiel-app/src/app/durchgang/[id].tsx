@@ -1,20 +1,24 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChecklistEingabe } from '../../components/ChecklistEingabe';
 import { VitalMonitor } from '../../components/VitalMonitor';
-import { Absatz, Eingabe, Karte, Knopf, Ueberschrift } from '../../components/ui';
+import { Absatz, Eingabe, Karte, Knopf, Ueberschrift, Umschalter } from '../../components/ui';
 import { bestaetigen } from '../../lib/bestaetigen';
 import { bewerte, dauer, neueId } from '../../lib/score';
+import { useEinstellungen } from '../../lib/einstellungen';
 import { useStore } from '../../lib/store';
+import { useToene } from '../../lib/toene';
 import type { Durchgang, LiveBewertung, Vitalwerte } from '../../lib/types';
 import { NORMALWERTE } from '../../lib/vitals';
-import { abstand, farben } from '../../theme';
+import { abstand, macheStile, useFarben } from '../../theme';
 
 export default function DurchgangScreen() {
+  const styles = useStyles();
+  const farben = useFarben();
   useKeepAwake(); // Bildschirm bleibt während der Übung an
   const { id } = useLocalSearchParams<{ id: string }>();
   const { durchgang, fall, speichereDurchgang, loescheDurchgang } = useStore();
@@ -23,7 +27,9 @@ export default function DurchgangScreen() {
   const insets = useSafeAreaInsets();
 
   const [werte, setWerte] = useState<Vitalwerte>(f?.vitalStart ?? NORMALWERTE);
-  const [verdeckt, setVerdeckt] = useState(false);
+  const { einstellungen } = useEinstellungen();
+  const toene = useToene();
+  const [verdeckt, setVerdeckt] = useState(einstellungen.messenModus);
   const [lageZeigen, setLageZeigen] = useState(false);
   const [jetzt, setJetzt] = useState(Date.now());
   const [reiter, setReiter] = useState<'monitor' | 'bewertung'>('monitor');
@@ -34,6 +40,17 @@ export default function DurchgangScreen() {
     const t = setInterval(() => setJetzt(Date.now()), 500);
     return () => clearInterval(t);
   }, [laeuft]);
+
+  // Zeitlimit aus den Einstellungen: einmal ein Signal, wenn es gerade erreicht wurde
+  const limitMs = einstellungen.zeitlimit * 60000;
+  const ueberzogen = !!d && laeuft && limitMs > 0 ? jetzt - d.start - limitMs : -1;
+  const signalGegeben = useRef(false);
+  useEffect(() => {
+    if (ueberzogen >= 0 && ueberzogen < 5000 && !signalGegeben.current) {
+      signalGegeben.current = true;
+      toene.fertig();
+    }
+  }, [ueberzogen, toene]);
 
   if (!d) return <Absatz>Durchgang nicht gefunden.</Absatz>;
 
@@ -73,13 +90,19 @@ export default function DurchgangScreen() {
     <ScrollView contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}>
       <Stack.Screen options={{ title: d.team }} />
 
-      <View style={[styles.timer, !laeuft && { backgroundColor: '#37474F' }]}>
+      <View style={[styles.timer, !laeuft && { backgroundColor: farben.timerBeendet }]}>
         <Text style={styles.timerLabel}>{laeuft ? 'LÄUFT' : 'BEENDET'}</Text>
         <Text style={styles.timerZeit}>{zeit}</Text>
         <Text style={styles.timerFall} numberOfLines={2}>
           {d.fallTitel}
         </Text>
       </View>
+
+      {ueberzogen >= 0 && (
+        <View style={styles.limit}>
+          <Text style={styles.limitText}>⏰ Zeitlimit von {einstellungen.zeitlimit} Minuten erreicht</Text>
+        </View>
+      )}
 
       {laeuft ? (
         <>
@@ -111,10 +134,10 @@ export default function DurchgangScreen() {
                   <Text style={styles.schalterTitel}>Messen-Modus</Text>
                   <Text style={styles.schalterText}>Werte verdeckt – erst beim Antippen sichtbar, wenn die Helfer:innen messen.</Text>
                 </View>
-                <Switch value={verdeckt} onValueChange={setVerdeckt} trackColor={{ true: farben.rot }} />
+                <Umschalter value={verdeckt} onValueChange={setVerdeckt} />
               </View>
 
-              <VitalMonitor werte={werte} onChange={setWerte} verdeckt={verdeckt} />
+              <VitalMonitor werte={werte} onChange={setWerte} verdeckt={verdeckt} mitTon />
 
               {f && (
                 <View style={styles.knoepfe}>
@@ -211,6 +234,7 @@ export default function DurchgangScreen() {
 }
 
 function Reiter({ text, an, onPress }: { text: string; an: boolean; onPress: () => void }) {
+  const styles = useStyles();
   return (
     <Pressable onPress={onPress} accessibilityRole="tab" accessibilityState={{ selected: an }} style={[styles.reiterKnopf, an && styles.reiterAn]}>
       <Text style={[styles.reiterText, an && { color: '#fff' }]}>{text}</Text>
@@ -218,7 +242,7 @@ function Reiter({ text, an, onPress }: { text: string; an: boolean; onPress: () 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   reiter: { flexDirection: 'row', backgroundColor: farben.karte, borderRadius: 12, padding: 4, gap: 4, marginBottom: abstand.m },
   reiterKnopf: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   reiterAn: { backgroundColor: farben.rot },
@@ -227,6 +251,8 @@ const styles = StyleSheet.create({
   timerLabel: { color: farben.gelb, fontWeight: '900', letterSpacing: 2, fontSize: 13 },
   timerZeit: { color: '#fff', fontSize: 56, fontWeight: '900', fontVariant: ['tabular-nums'] },
   timerFall: { color: '#fff', fontSize: 15, textAlign: 'center' },
+  limit: { backgroundColor: farben.gelb, borderRadius: 12, padding: abstand.m, marginBottom: abstand.m, alignItems: 'center' },
+  limitText: { color: farben.aufGelb, fontWeight: '900', fontSize: 16 },
   zeile: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -242,4 +268,4 @@ const styles = StyleSheet.create({
   bewertung: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: farben.rand },
   bewertungName: { fontSize: 16, fontWeight: '600', color: farben.text },
   bewertungWert: { fontSize: 16, color: farben.textLeise, fontVariant: ['tabular-nums'] },
-});
+}));

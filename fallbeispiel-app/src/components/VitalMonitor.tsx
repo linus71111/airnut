@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, Text, View } from 'react-native';
 
+import { useToene } from '../lib/toene';
 import type { Vitalwerte } from '../lib/types';
 import { aendern, BEWUSSTSEIN_STUFEN, formatWert, istAuffaellig, VITAL_DEFS, type VitalDef } from '../lib/vitals';
-import { farben } from '../theme';
+import { macheStile } from '../theme';
 
 type Props = {
   werte: Vitalwerte;
@@ -11,10 +12,25 @@ type Props = {
   onChange?: (w: Vitalwerte) => void;
   /** Messen-Modus: Werte sind verdeckt, bis die Helfer:innen sie "messen" (antippen) */
   verdeckt?: boolean;
+  /** Herzschlag-Piepton und Alarmton abspielen (nur während der Übung) */
+  mitTon?: boolean;
 };
 
-export function VitalMonitor({ werte, onChange, verdeckt }: Props) {
+export function VitalMonitor({ werte, onChange, verdeckt, mitTon }: Props) {
+  const styles = useStyles();
+  const toene = useToene();
   const [aufgedeckt, setAufgedeckt] = useState<Record<string, boolean>>({});
+
+  // Alarm, sobald ein weiterer Wert aus dem Normalbereich rutscht
+  const auffaellig = VITAL_DEFS.filter((d) => istAuffaellig(d, werte[d.key]))
+    .map((d) => d.key)
+    .join(',');
+  const vorher = useRef(auffaellig);
+  useEffect(() => {
+    const alt = new Set(vorher.current.split(','));
+    vorher.current = auffaellig;
+    if (mitTon && auffaellig.split(',').some((k) => k && !alt.has(k))) toene.alarm();
+  }, [auffaellig, mitTon, toene]);
 
   useEffect(() => {
     if (!verdeckt) setAufgedeckt({});
@@ -27,7 +43,7 @@ export function VitalMonitor({ werte, onChange, verdeckt }: Props) {
 
   return (
     <View style={styles.monitor}>
-      <Herzschlag puls={werte.puls} />
+      <Herzschlag puls={werte.puls} onSchlag={mitTon && toene.herztonAn ? toene.herzschlag : undefined} />
       <View style={styles.raster}>
         {VITAL_DEFS.map((def) => (
           <Kachel
@@ -96,6 +112,7 @@ function Kachel({
   onPlus?: () => void;
   onMinus?: () => void;
 }) {
+  const styles = useStyles();
   const alarm = istAuffaellig(def, wert);
   return (
     <Pressable onPress={onTap} style={[styles.kachel, sichtbar && alarm && styles.kachelAlarm]}>
@@ -118,6 +135,7 @@ function Kachel({
 }
 
 function MiniKnopf({ text, onPress }: { text: string; onPress: () => void }) {
+  const styles = useStyles();
   return (
     <Pressable onPress={onPress} hitSlop={6} style={({ pressed }) => [styles.mini, pressed && { backgroundColor: '#33404F' }]}>
       <Text style={styles.miniText}>{text}</Text>
@@ -126,8 +144,19 @@ function MiniKnopf({ text, onPress }: { text: string; onPress: () => void }) {
 }
 
 /** Kleine pulsierende Herz-Anzeige im Takt des Pulses */
-function Herzschlag({ puls }: { puls: number }) {
+function Herzschlag({ puls, onSchlag }: { puls: number; onSchlag?: () => void }) {
+  const styles = useStyles();
   const skala = useRef(new Animated.Value(1)).current;
+  // Piepton im Takt des Pulses
+  const schlag = useRef(onSchlag);
+  schlag.current = onSchlag;
+  const tonAn = !!onSchlag;
+  useEffect(() => {
+    if (!tonAn || puls <= 0) return;
+    const t = setInterval(() => schlag.current?.(), 60000 / puls);
+    return () => clearInterval(t);
+  }, [puls, tonAn]);
+
   useEffect(() => {
     if (puls <= 0) {
       skala.setValue(1);
@@ -153,7 +182,7 @@ function Herzschlag({ puls }: { puls: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   monitor: { backgroundColor: farben.monitor, borderRadius: 16, padding: 10, marginBottom: 12 },
   kopf: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 6, paddingBottom: 6 },
   herz: { color: '#FF5252', fontSize: 22 },
@@ -180,4 +209,4 @@ const styles = StyleSheet.create({
   textKachel: { backgroundColor: farben.monitorKarte, borderRadius: 12, padding: 10, marginTop: 8 },
   textLabel: { color: '#9AA5B1', fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
   textWert: { color: '#E8EDF2', fontSize: 17, fontWeight: '600', marginTop: 2 },
-});
+}));

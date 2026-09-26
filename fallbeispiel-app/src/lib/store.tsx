@@ -23,6 +23,8 @@ type Store = {
   person: (id: string) => Person | undefined;
   speicherePerson: (p: Person) => void;
   loeschePerson: (id: string) => void;
+  /** Löscht Einsätze, Personen und/oder eigene Fälle */
+  loescheDaten: (was: { einsaetze?: boolean; personen?: boolean; faelle?: boolean }) => void;
 };
 
 const StoreContext = createContext<Store | null>(null);
@@ -93,6 +95,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Einsätze bleiben erhalten, der Name steht weiterhin im Team-Namen
   const loeschePerson = useCallback((id: string) => setPersonen((alt) => alt.filter((x) => x.id !== id)), []);
 
+  const loescheDaten = useCallback((was: { einsaetze?: boolean; personen?: boolean; faelle?: boolean }) => {
+    if (was.einsaetze) setDurchgaenge([]);
+    if (was.personen) setPersonen([]);
+    if (was.faelle) setEigene([]);
+  }, []);
+
   const wert = useMemo(
     () => ({
       geladen,
@@ -109,8 +117,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       person,
       speicherePerson,
       loeschePerson,
+      loescheDaten,
     }),
-    [geladen, faelle, durchgaenge, personen, fall, durchgang, speichereFall, loescheFall, speichereDurchgang, loescheDurchgang, fuegeBewertungHinzu, person, speicherePerson, loeschePerson],
+    [
+      geladen,
+      faelle,
+      durchgaenge,
+      personen,
+      fall,
+      durchgang,
+      speichereFall,
+      loescheFall,
+      speichereDurchgang,
+      loescheDurchgang,
+      fuegeBewertungHinzu,
+      person,
+      speicherePerson,
+      loeschePerson,
+      loescheDaten,
+    ],
   );
 
   return <StoreContext.Provider value={wert}>{children}</StoreContext.Provider>;

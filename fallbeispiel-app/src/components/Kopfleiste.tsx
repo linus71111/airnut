@@ -1,13 +1,14 @@
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useStore } from '../lib/store';
-import { farben } from '../theme';
+import { macheStile, useFarben } from '../theme';
 
 /** Gut sichtbarer Zurück-Knopf. Ohne Vorgänger (z.B. nach Neuladen im Browser) geht es zur Startseite. */
 export function ZurueckKnopf() {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -22,6 +23,7 @@ export function ZurueckKnopf() {
 
 /** Burger-Menü (☰) mit allen Bereichen und den Akten der Helfer:innen */
 export function MenueKnopf() {
+  const styles = useStyles();
   const [offen, setOffen] = useState(false);
   const { personen } = useStore();
   const insets = useSafeAreaInsets();
@@ -56,6 +58,7 @@ export function MenueKnopf() {
               <Eintrag text="📖  Anleitung" onPress={() => gehe('/anleitung')} />
               <Eintrag text="📋  Einsatz-Historie" onPress={() => gehe('/verlauf')} />
               <Eintrag text="➕  Eigener Fall" onPress={() => gehe('/editor')} />
+              <Eintrag text="⚙️  Einstellungen" onPress={() => gehe('/einstellungen')} />
 
               <Text style={styles.abschnitt}>Akten</Text>
               <Eintrag text="👥  Alle Helfer:innen" onPress={() => gehe('/personen')} />
@@ -72,17 +75,19 @@ export function MenueKnopf() {
 }
 
 function Eintrag({ text, onPress, eingerueckt }: { text: string; onPress: () => void; eingerueckt?: boolean }) {
+  const styles = useStyles();
+  const farben = useFarben();
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.eintrag, eingerueckt && { paddingLeft: 28 }, pressed && { backgroundColor: '#FDECEE' }]}>
+      style={({ pressed }) => [styles.eintrag, eingerueckt && { paddingLeft: 28 }, pressed && { backgroundColor: farben.gedrueckt }]}>
       <Text style={[styles.eintragText, eingerueckt && { fontSize: 15, fontWeight: '600' }]}>{text}</Text>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   kopfKnopf: { paddingHorizontal: 8, paddingVertical: 4 },
   zurueck: { color: '#fff', fontSize: 17, fontWeight: '700' },
   burger: { color: '#fff', fontSize: 26, fontWeight: '700' },
@@ -120,4 +125,4 @@ const styles = StyleSheet.create({
   eintrag: { paddingHorizontal: 16, paddingVertical: 12 },
   eintragText: { fontSize: 16, fontWeight: '700', color: farben.text },
   leer: { paddingHorizontal: 28, paddingVertical: 8, color: farben.textLeise },
-});
+}));

@@ -26,6 +26,13 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
   Einsätzen, Durchschnitt, bestem Ergebnis, Ergebnis je Schwierigkeit, „Klappt schon gut“ und „Daran noch arbeiten“.
 - **Einsatz-Historie** aller Durchgänge, filterbar nach Schwierigkeit und Person.
 - **Eigene Fallbeispiele** erstellen oder vorhandene als Vorlage kopieren.
+- **Einstellungen** (im Menü ☰): Hell / Dunkel / wie Handy, Töne, Vibration, Messen-Modus automatisch, Zeitlimit mit Signalton,
+  Daten löschen.
+- **Dark Mode** für die ganze App.
+- **Töne**: Herzschlag-Piepton im Takt des Pulses, Alarm wenn ein Vitalwert auffällig wird, Klick beim Abhaken,
+  Signal beim Zeitlimit. Die Töne stehen in `src/lib/tonDaten.ts`; die WAV-Dateien fürs Handy erzeugt
+  `node --experimental-strip-types scripts/erzeuge-toene.ts`.
+- **Bewertungskriterien abwählen**: Vor dem Start Punkte antippen, die diesmal nicht bewertet werden sollen.
 - **Burger-Menü (☰)** oben rechts mit allen Bereichen und direktem Zugriff auf die Akten, **Zurück-Knopf** oben links.
 - Alles wird auf dem Handy gespeichert (kein Internet nötig).
 

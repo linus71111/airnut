@@ -1,15 +1,16 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChecklistEingabe } from '../../components/ChecklistEingabe';
 import { Absatz, Eingabe, Karte, Knopf } from '../../components/ui';
 import { neueId } from '../../lib/score';
 import { useStore } from '../../lib/store';
-import { abstand, farben } from '../../theme';
+import { abstand, macheStile } from '../../theme';
 
 export default function Bewerten() {
+  const styles = useStyles();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { durchgang, fuegeBewertungHinzu } = useStore();
   const d = durchgang(id);
@@ -65,6 +66,6 @@ export default function Bewerten() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   titel: { fontSize: 22, fontWeight: '900', color: farben.text, marginBottom: 4 },
-});
+}));

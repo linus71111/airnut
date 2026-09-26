@@ -1,9 +1,9 @@
-import * as Haptics from 'expo-haptics';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { dauer } from '../lib/score';
+import { useToene } from '../lib/toene';
 import type { CheckItem } from '../lib/types';
-import { farben } from '../theme';
+import { macheStile } from '../theme';
 import { Badge, Checkbox, Karte } from './ui';
 
 type Props = {
@@ -16,10 +16,12 @@ type Props = {
 
 /** Checkliste zum Abhaken, nach Kategorien gruppiert */
 export function ChecklistEingabe({ checkliste, erledigt, onUmschalten, zeiten }: Props) {
+  const styles = useStyles();
+  const toene = useToene();
   const kategorien = [...new Set(checkliste.map((c) => c.kategorie))];
 
   const umschalten = (id: string) => {
-    if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
+    toene.abhaken();
     onUmschalten(id);
   };
 
@@ -53,8 +55,8 @@ export function ChecklistEingabe({ checkliste, erledigt, onUmschalten, zeiten }:
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   kategorie: { fontSize: 13, fontWeight: '800', color: farben.rot, textTransform: 'uppercase' },
   badges: { flexDirection: 'row', gap: 4, marginTop: 4, alignItems: 'center', flexWrap: 'wrap' },
   zeit: { fontSize: 12, color: farben.gruen, fontWeight: '800', marginLeft: 4 },
-});
+}));

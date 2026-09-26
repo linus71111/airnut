@@ -1,15 +1,17 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge, Knopf, SchwierigkeitBadge } from '../components/ui';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import type { Schwierigkeit } from '../lib/types';
 import { useStore } from '../lib/store';
-import { abstand, farben } from '../theme';
+import { abstand, macheStile, useFarben } from '../theme';
 
 export default function Start() {
+  const styles = useStyles();
+  const farben = useFarben();
   const { faelle, durchgaenge, personen, geladen } = useStore();
   const [suche, setSuche] = useState('');
   const [stufe, setStufe] = useState<Schwierigkeit | null>(null);
@@ -55,12 +57,12 @@ export default function Start() {
             value={suche}
             onChangeText={setSuche}
             placeholder="Fallbeispiel suchen …"
-            placeholderTextColor="#999"
+            placeholderTextColor={farben.platzhalter}
             style={styles.suche}
           />
 
           <View style={styles.filter}>
-            <FilterChip text="Alle" an={!stufe} farbe={farben.text} onPress={() => setStufe(null)} />
+            <FilterChip text="Alle" an={!stufe} farbe={farben.neutral} onPress={() => setStufe(null)} />
             {SCHWIERIGKEITEN.map((st) => (
               <FilterChip
                 key={st}
@@ -94,6 +96,7 @@ export default function Start() {
 }
 
 function FilterChip({ text, an, farbe, onPress }: { text: string; an: boolean; farbe: string; onPress: () => void }) {
+  const styles = useStyles();
   return (
     <Pressable
       onPress={onPress}
@@ -104,19 +107,19 @@ function FilterChip({ text, an, farbe, onPress }: { text: string; an: boolean; f
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   halb: { flexGrow: 1, flexBasis: '45%' },
   filter: { flexDirection: 'row', gap: 8, marginBottom: abstand.m, flexWrap: 'wrap' },
   chip: { borderWidth: 2, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 6 },
   chipText: { fontSize: 14, fontWeight: '800' },
   banner: { backgroundColor: farben.gelb, borderRadius: 16, padding: abstand.l, marginBottom: abstand.m },
-  bannerTitel: { fontSize: 22, fontWeight: '900', color: farben.rot },
-  bannerText: { fontSize: 15, lineHeight: 21, color: farben.text, marginTop: 4 },
+  bannerTitel: { fontSize: 22, fontWeight: '900', color: farben.rotAufGelb },
+  bannerText: { fontSize: 15, lineHeight: 21, color: farben.aufGelb, marginTop: 4 },
   laufend: { backgroundColor: farben.gruen, borderRadius: 12, padding: 14, marginBottom: abstand.m },
   laufendText: { color: '#fff', fontWeight: '800', fontSize: 15 },
   knoepfe: { flexDirection: 'row', flexWrap: 'wrap', gap: abstand.s, marginBottom: abstand.m },
   suche: {
-    backgroundColor: '#fff',
+    backgroundColor: farben.eingabe,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: farben.rand,
@@ -136,4 +139,4 @@ const styles = StyleSheet.create({
   fallTitel: { fontSize: 17, fontWeight: '800', color: farben.text, flex: 1 },
   fallKurz: { fontSize: 15, color: farben.textLeise, marginTop: 4 },
   fallMeta: { fontSize: 12, color: farben.rot, fontWeight: '700', marginTop: 8 },
-});
+}));

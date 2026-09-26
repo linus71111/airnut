@@ -1,14 +1,15 @@
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Eingabe, Karte, Knopf } from '../../components/ui';
 import { akte, neueId, note } from '../../lib/score';
 import { useStore } from '../../lib/store';
-import { abstand, farben } from '../../theme';
+import { abstand, macheStile } from '../../theme';
 
 export default function Personen() {
+  const styles = useStyles();
   const { personen, durchgaenge, speicherePerson } = useStore();
   const [name, setName] = useState('');
   const insets = useSafeAreaInsets();
@@ -62,7 +63,7 @@ export default function Personen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   leer: { textAlign: 'center', color: farben.textLeise, marginTop: abstand.l, fontSize: 15, lineHeight: 21 },
   eintrag: {
     flexDirection: 'row',
@@ -74,9 +75,9 @@ const styles = StyleSheet.create({
     marginBottom: abstand.s,
   },
   avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: farben.gelb, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 18, fontWeight: '900', color: farben.rot },
+  avatarText: { fontSize: 18, fontWeight: '900', color: farben.rotAufGelb },
   name: { fontSize: 16, fontWeight: '800', color: farben.text },
   meta: { fontSize: 13, color: farben.textLeise, marginTop: 2 },
   wert: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
   wertText: { color: '#fff', fontWeight: '900' },
-});
+}));

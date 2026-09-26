@@ -1,6 +1,6 @@
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SchwierigkeitBadge } from '../components/ui';
@@ -8,9 +8,11 @@ import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import { dauer, gesamt, note } from '../lib/score';
 import { useStore } from '../lib/store';
 import type { Schwierigkeit } from '../lib/types';
-import { abstand, farben } from '../theme';
+import { abstand, macheStile, useFarben } from '../theme';
 
 export default function Verlauf() {
+  const styles = useStyles();
+  const farben = useFarben();
   const { durchgaenge, personen } = useStore();
   const insets = useSafeAreaInsets();
   const [stufe, setStufe] = useState<Schwierigkeit | null>(null);
@@ -86,7 +88,7 @@ export default function Verlauf() {
                 {d.ende ? ` · ${dauer(d.ende - d.start)} min` : ' · läuft noch'}
               </Text>
             </View>
-            <View style={[styles.wert, { backgroundColor: fertig ? n.farbe : '#9AA0A6' }]}>
+            <View style={[styles.wert, { backgroundColor: fertig ? n.farbe : farben.grau }]}>
               <Text style={styles.wertText}>{fertig ? `${g.durchschnittProzent}%` : '…'}</Text>
             </View>
           </Pressable>
@@ -96,7 +98,10 @@ export default function Verlauf() {
   );
 }
 
-function Chip({ text, an, onPress, farbe = farben.text }: { text: string; an: boolean; onPress: () => void; farbe?: string }) {
+function Chip({ text, an, onPress, farbe: eigeneFarbe }: { text: string; an: boolean; onPress: () => void; farbe?: string }) {
+  const styles = useStyles();
+  const farben = useFarben();
+  const farbe = eigeneFarbe ?? farben.neutral;
   return (
     <Pressable onPress={onPress} style={[styles.chip, { borderColor: farbe }, an && { backgroundColor: farbe }]}>
       <Text style={[styles.chipText, { color: an ? '#fff' : farbe }]}>{text}</Text>
@@ -104,7 +109,7 @@ function Chip({ text, an, onPress, farbe = farben.text }: { text: string; an: bo
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   leer: { textAlign: 'center', color: farben.textLeise, marginTop: 40, fontSize: 16 },
   zahlen: { flexDirection: 'row', gap: abstand.s, marginBottom: abstand.m },
   zahl: { flex: 1, backgroundColor: farben.karte, borderRadius: 14, paddingVertical: abstand.m, alignItems: 'center' },
@@ -126,4 +131,4 @@ const styles = StyleSheet.create({
   meta: { fontSize: 13, color: farben.textLeise, lineHeight: 19 },
   wert: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, minWidth: 60, alignItems: 'center' },
   wertText: { color: '#fff', fontWeight: '900', fontSize: 16 },
-});
+}));

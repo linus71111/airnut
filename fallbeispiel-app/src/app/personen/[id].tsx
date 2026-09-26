@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Absatz, Eingabe, Karte, Knopf, SchwierigkeitBadge, Ueberschrift } from '../../components/ui';
@@ -7,9 +7,11 @@ import { bestaetigen } from '../../lib/bestaetigen';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../../lib/schwierigkeit';
 import { akte, note } from '../../lib/score';
 import { useStore } from '../../lib/store';
-import { abstand, farben } from '../../theme';
+import { abstand, macheStile, useFarben } from '../../theme';
 
 export default function PersonAkte() {
+  const styles = useStyles();
+  const farben = useFarben();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { person, durchgaenge, speicherePerson, loeschePerson } = useStore();
   const p = person(id);
@@ -80,7 +82,7 @@ export default function PersonAkte() {
       )}
 
       {a.oftVergessen.length > 0 && (
-        <Karte stil={{ borderColor: '#D18B00', borderWidth: 2 }}>
+        <Karte stil={{ borderColor: farben.orange, borderWidth: 2 }}>
           <Ueberschrift>🎯 Daran noch arbeiten</Ueberschrift>
           {a.oftVergessen.map((s) => (
             <Absatz key={s.text}>
@@ -132,6 +134,7 @@ export default function PersonAkte() {
 }
 
 function Zahl({ wert, label, farbe }: { wert: string; label: string; farbe?: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.zahl}>
       <Text style={[styles.zahlWert, farbe ? { color: farbe } : null]}>{wert}</Text>
@@ -140,10 +143,10 @@ function Zahl({ wert, label, farbe }: { wert: string; label: string; farbe?: str
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   kopf: { flexDirection: 'row', alignItems: 'center', gap: abstand.m, marginBottom: abstand.m },
   avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: farben.gelb, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 26, fontWeight: '900', color: farben.rot },
+  avatarText: { fontSize: 26, fontWeight: '900', color: farben.rotAufGelb },
   name: { fontSize: 24, fontWeight: '900', color: farben.text },
   seit: { fontSize: 13, color: farben.textLeise },
   zahlen: { flexDirection: 'row', gap: abstand.s, marginBottom: abstand.m },
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
   zeile: { flexDirection: 'row', justifyContent: 'space-between' },
   stufe: { fontSize: 15, fontWeight: '700', color: farben.text },
   stufeWert: { fontSize: 15, color: farben.textLeise, fontVariant: ['tabular-nums'] },
-  balkenHg: { height: 8, backgroundColor: '#E8EAED', borderRadius: 4, marginTop: 4, overflow: 'hidden' },
+  balkenHg: { height: 8, backgroundColor: farben.balkenHg, borderRadius: 4, marginTop: 4, overflow: 'hidden' },
   balken: { height: 8, borderRadius: 4 },
   anzahl: { color: farben.textLeise, fontSize: 13 },
   einsatz: {
@@ -167,4 +170,4 @@ const styles = StyleSheet.create({
   einsatzTitel: { fontSize: 15, fontWeight: '700', color: farben.text },
   datum: { fontSize: 12, color: farben.textLeise, flexShrink: 1 },
   prozent: { fontSize: 18, fontWeight: '900', fontVariant: ['tabular-nums'] },
-});
+}));

@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { VitalMonitor } from '../../components/VitalMonitor';
@@ -8,19 +8,25 @@ import { Absatz, Badge, Eingabe, Karte, Knopf, SchwierigkeitBadge, Ueberschrift 
 import { bestaetigen } from '../../lib/bestaetigen';
 import { neueId } from '../../lib/score';
 import { useStore } from '../../lib/store';
-import { abstand, farben } from '../../theme';
+import { abstand, macheStile, useFarben } from '../../theme';
 
 export default function FallDetail() {
+  const styles = useStyles();
+  const farben = useFarben();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { fall, speichereDurchgang, loescheFall, personen, speicherePerson } = useStore();
   const f = fall(id);
   const [team, setTeam] = useState('');
   const [helfer, setHelfer] = useState<string[]>([]);
   const [neuerName, setNeuerName] = useState('');
+  /** Punkte, die in diesem Durchgang nicht bewertet werden */
+  const [abgewaehlt, setAbgewaehlt] = useState<Record<string, boolean>>({});
   const [mimeZeigen, setMimeZeigen] = useState(false);
   const insets = useSafeAreaInsets();
 
   if (!f) return <Absatz>Fallbeispiel nicht gefunden.</Absatz>;
+
+  const aktiv = f.checkliste.filter((c) => !abgewaehlt[c.id]);
 
   const umschalten = (pid: string) => setHelfer((h) => (h.includes(pid) ? h.filter((x) => x !== pid) : [...h, pid]));
 
@@ -42,7 +48,7 @@ export default function FallDetail() {
       helferIds: helfer,
       team: team.trim() || namen.join(' & ') || 'Team 1',
       start: Date.now(),
-      checkliste: f.checkliste,
+      checkliste: aktiv,
       bewertungen: [],
     };
     speichereDurchgang(d);
@@ -50,6 +56,7 @@ export default function FallDetail() {
   };
 
   const kategorien = [...new Set(f.checkliste.map((c) => c.kategorie))];
+  const anzahlAus = f.checkliste.filter((c) => abgewaehlt[c.id]).length;
 
   return (
     <ScrollView contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}>
@@ -90,26 +97,48 @@ export default function FallDetail() {
       <VitalMonitor werte={f.vitalStart} />
 
       <Karte>
-        <Ueberschrift>✅ Checkliste ({f.checkliste.length} Punkte)</Ueberschrift>
+        <Ueberschrift>
+          ✅ Checkliste ({aktiv.length}
+          {anzahlAus > 0 ? ` von ${f.checkliste.length}` : ''} Punkte)
+        </Ueberschrift>
+        <Absatz leise>Tippe einen Punkt an, wenn er diesmal nicht bewertet werden soll (z.B. kein Übungs-AED vorhanden).</Absatz>
+        {anzahlAus > 0 && (
+          <Pressable onPress={() => setAbgewaehlt({})} hitSlop={6} style={{ marginTop: abstand.s }}>
+            <Text style={styles.alleAn}>↺ Alle {anzahlAus} abgewählten Punkte wieder aktivieren</Text>
+          </Pressable>
+        )}
         {kategorien.map((k) => (
           <View key={k} style={{ marginBottom: abstand.s }}>
             <Text style={styles.kategorie}>{k}</Text>
             {f.checkliste
               .filter((c) => c.kategorie === k)
               .map((c) => (
-                <View key={c.id} style={styles.punkt}>
-                  <Text style={styles.punktText}>• {c.text}</Text>
+                <Pressable
+                  key={c.id}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: !abgewaehlt[c.id] }}
+                  onPress={() => setAbgewaehlt((a) => ({ ...a, [c.id]: !a[c.id] }))}
+                  style={({ pressed }) => [styles.punkt, abgewaehlt[c.id] && { opacity: 0.45 }, pressed && { opacity: 0.6 }]}>
+                  <Text style={[styles.punktText, abgewaehlt[c.id] && styles.durchgestrichen]}>
+                    {abgewaehlt[c.id] ? '⊘' : '•'} {c.text}
+                  </Text>
                   <View style={{ flexDirection: 'row', gap: 4 }}>
-                    {c.kritisch && <Badge text="WICHTIG" />}
-                    <Badge text={`${c.punkte} P`} farbe="#5F6368" />
+                    {abgewaehlt[c.id] ? (
+                      <Badge text="ABGEWÄHLT" farbe="#5F6368" />
+                    ) : (
+                      <>
+                        {c.kritisch && <Badge text="WICHTIG" />}
+                        <Badge text={`${c.punkte} P`} farbe="#5F6368" />
+                      </>
+                    )}
                   </View>
-                </View>
+                </Pressable>
               ))}
           </View>
         ))}
       </Karte>
 
-      <Karte stil={{ backgroundColor: '#FFF8D6' }}>
+      <Karte stil={{ backgroundColor: farben.hinweis }}>
         <Ueberschrift>Durchgang starten</Ueberschrift>
         <Text style={styles.label}>Wer hilft? (antippen)</Text>
         <View style={styles.chips}>
@@ -132,7 +161,7 @@ export default function FallDetail() {
           <Knopf titel="+" onPress={personAnlegen} deaktiviert={!neuerName.trim()} stil={{ marginBottom: abstand.m, paddingHorizontal: 22 }} />
         </View>
         <Eingabe label="Teamname (optional)" value={team} onChangeText={setTeam} placeholder="sonst die Namen der Helfer:innen" />
-        <Knopf titel="▶ Start" onPress={starten} />
+        <Knopf titel={`▶ Start (${aktiv.length} Prüfpunkte)`} onPress={starten} deaktiviert={aktiv.length === 0} />
       </Karte>
 
       <View style={{ flexDirection: 'row', gap: abstand.m }}>
@@ -160,15 +189,17 @@ export default function FallDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = macheStile((farben) => ({
   titel: { fontSize: 24, fontWeight: '900', color: farben.text, marginBottom: abstand.m },
   kategorie: { fontSize: 13, fontWeight: '800', color: farben.rot, textTransform: 'uppercase', marginTop: 6 },
   punkt: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, paddingVertical: 4 },
   punktText: { flex: 1, fontSize: 15, lineHeight: 21, color: farben.text },
+  durchgestrichen: { textDecorationLine: 'line-through' },
+  alleAn: { color: farben.rot, fontWeight: '800' },
   label: { fontSize: 13, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },
-  chip: { borderWidth: 1, borderColor: farben.rand, backgroundColor: '#fff', borderRadius: 18, paddingHorizontal: 12, paddingVertical: 7 },
+  chip: { borderWidth: 1, borderColor: farben.rand, backgroundColor: farben.eingabe, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 7 },
   chipAn: { backgroundColor: farben.gruen, borderColor: farben.gruen },
   chipText: { fontSize: 15, fontWeight: '600', color: farben.text },
   neu: { flexDirection: 'row', gap: abstand.s, alignItems: 'flex-end' },
-});
+}));
