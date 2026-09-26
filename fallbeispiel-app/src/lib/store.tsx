@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { ALLE_STANDARD_FAELLE } from '../data/alleFaelle';
+import type { Sicherung } from './sicherung';
 import type { Bewertung, Durchgang, Fallbeispiel, Person } from './types';
 
 const KEY_FAELLE = 'fallbeispiel.eigeneFaelle.v1';
@@ -25,7 +26,29 @@ type Store = {
   loeschePerson: (id: string) => void;
   /** Löscht Einsätze, Personen und/oder eigene Fälle */
   loescheDaten: (was: { einsaetze?: boolean; personen?: boolean; faelle?: boolean }) => void;
+  /** Eigene Fälle für eine Sicherung (ohne Standardfälle) */
+  eigeneFaelle: Fallbeispiel[];
+  /**
+   * Spielt eine Sicherung ein. `zusammenfuehren`: Vorhandenes bleibt, Neues kommt dazu,
+   * gleiche Einträge werden aktualisiert (Bewertungen werden zusammengelegt). `ersetzen`: alles wird überschrieben.
+   */
+  importiere: (s: Sicherung, modus: 'zusammenfuehren' | 'ersetzen') => ImportErgebnis;
 };
+
+export type ImportErgebnis = { faelle: number; einsaetze: number; personen: number };
+
+/** Fügt Einträge nach ID zusammen; neue Einträge kommen vorne dazu */
+function zusammen<T extends { id: string }>(alt: T[], neu: T[], vereine: (a: T, b: T) => T = (_a, b) => b): T[] {
+  const neuNachId = new Map(neu.map((x) => [x.id, x]));
+  const ergebnis = alt.map((a) => (neuNachId.has(a.id) ? vereine(a, neuNachId.get(a.id)!) : a));
+  const vorhanden = new Set(alt.map((a) => a.id));
+  return [...neu.filter((x) => !vorhanden.has(x.id)), ...ergebnis];
+}
+
+function vereineDurchgang(a: Durchgang, b: Durchgang): Durchgang {
+  const ids = new Set(b.bewertungen.map((x) => x.id));
+  return { ...a, ...b, bewertungen: [...b.bewertungen, ...a.bewertungen.filter((x) => !ids.has(x.id))].sort((x, y) => x.zeit - y.zeit) };
+}
 
 const StoreContext = createContext<Store | null>(null);
 
@@ -101,6 +124,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (was.faelle) setEigene([]);
   }, []);
 
+  const importiere = useCallback((s: Sicherung, modus: 'zusammenfuehren' | 'ersetzen'): ImportErgebnis => {
+    const faelleNeu = s.eigeneFaelle.map((f) => ({ ...f, eigenes: true, schwierigkeit: f.schwierigkeit ?? 'mittel' }));
+    const sortiert = (p: Person[]) => [...p].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+    if (modus === 'ersetzen') {
+      setEigene(faelleNeu);
+      setDurchgaenge([...s.durchgaenge].sort((a, b) => b.start - a.start));
+      setPersonen(sortiert(s.personen));
+    } else {
+      setEigene((alt) => zusammen(alt, faelleNeu));
+      setDurchgaenge((alt) => zusammen(alt, s.durchgaenge, vereineDurchgang).sort((a, b) => b.start - a.start));
+      setPersonen((alt) => sortiert(zusammen(alt, s.personen)));
+    }
+    return { faelle: faelleNeu.length, einsaetze: s.durchgaenge.length, personen: s.personen.length };
+  }, []);
+
   const wert = useMemo(
     () => ({
       geladen,
@@ -118,6 +156,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       speicherePerson,
       loeschePerson,
       loescheDaten,
+      eigeneFaelle: eigene,
+      importiere,
     }),
     [
       geladen,
@@ -135,6 +175,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       speicherePerson,
       loeschePerson,
       loescheDaten,
+      eigene,
+      importiere,
     ],
   );
 

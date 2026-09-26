@@ -75,6 +75,7 @@ export function MenueKnopf({ imInhalt }: { imInhalt?: boolean }) {
                 }}
               />
               <Eintrag text="➕  Eigener Fall" onPress={() => gehe('/editor')} />
+              <Eintrag text="💾  Sicherung & Import" onPress={() => gehe('/daten')} />
               <Eintrag text="⚙️  Einstellungen" onPress={() => gehe('/einstellungen')} />
 
               <Text style={styles.abschnitt}>Akten</Text>

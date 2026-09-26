@@ -39,6 +39,10 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
   `node --experimental-strip-types scripts/erzeuge-toene.ts`.
 - **Bewertungskriterien abwählen**: Vor dem Start Punkte antippen, die diesmal nicht bewertet werden sollen.
 - **Burger-Menü (☰)** oben rechts mit allen Bereichen und direktem Zugriff auf die Akten, **Zurück-Knopf** oben links.
+- **💾 Sicherung & Import** (Menü ☰): Alle Einsätze, Akten und eigenen Fälle als eine Datei speichern oder verschicken
+  und auf einem anderen Handy wieder einspielen – wahlweise zu den vorhandenen Daten hinzufügen oder alles ersetzen.
+- **🔗 Eigene Fälle teilen** per QR-Code oder Link: Fall öffnen → „Teilen“. Wer den Code scannt oder den Link öffnet,
+  kann den Fall mit „Fall übernehmen“ speichern. Links lassen sich auch unter „Sicherung“ einfügen.
 - Alles wird auf dem Handy gespeichert (kein Internet nötig).
 
 > ⚠️ Die Inhalte sind Übungsmaterial. Bitte vor dem Einsatz mit euren Ausbilder:innen abstimmen.
@@ -131,6 +135,8 @@ Die Paketnamen stehen in `app.json` (`de.jet.fallbeispiel`) – ändert sie ggf.
 | `src/app/anleitung.tsx` | Anleitung zum Ablauf eines Fallbeispiels |
 | `src/app/personen/` | Liste der Helfer:innen und ihre Akte |
 | `src/app/verlauf.tsx` | Einsatz-Historie |
+| `src/app/daten.tsx`, `src/lib/sicherung.ts` | Sicherung speichern & einspielen |
+| `src/app/import.tsx`, `src/lib/teilen.ts` | Geteilte Fälle (Link/QR-Code) übernehmen |
 | `src/data/faelle*.ts` | **Die fertigen Fallbeispiele – hier könnt ihr Texte & Checklisten anpassen** (`faelle.ts` Wasser/Alltag, `faelleRettungsdienst.ts`, `faelleAlltag.ts`, `faelleWitzig.ts`) |
 | `src/lib/vitals.ts` | Normbereiche der Vitalwerte |
 | `src/components/VitalMonitor.tsx` | Der Patientenmonitor |
@@ -139,5 +145,4 @@ Die Paketnamen stehen in `app.json` (`de.jet.fallbeispiel`) – ändert sie ggf.
 
 - Mehrere Handys gleichzeitig (jede:r bewertet auf dem eigenen Handy) – dafür braucht es einen
   Server/Datenbank, z.B. Firebase oder Supabase.
-- Fallbeispiele per QR-Code mit anderen Gruppen teilen.
 - Kinder-Normwerte (Puls/Atmung sind bei Kindern anders).

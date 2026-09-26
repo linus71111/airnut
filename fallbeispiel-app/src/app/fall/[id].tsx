@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { FallTeilen } from '../../components/FallTeilen';
 import { PersonAnlegen } from '../../components/PersonAnlegen';
 import { VitalMonitor } from '../../components/VitalMonitor';
 import { Absatz, Badge, Eingabe, Karte, Knopf, SchwierigkeitBadge, Ueberschrift } from '../../components/ui';
@@ -19,7 +20,7 @@ export default function FallDetail() {
   const styles = useStyles();
   const farben = useFarben();
   const { id, zufall, stufe } = useLocalSearchParams<{ id: string; zufall?: string; stufe?: Schwierigkeit }>();
-  const { fall, faelle, speichereDurchgang, loescheFall, personen } = useStore();
+  const { fall, faelle, speichereDurchgang, loescheFall, personen, geladen } = useStore();
   const f = fall(id);
   const [team, setTeam] = useState('');
   const [helfer, setHelfer] = useState<string[]>([]);
@@ -30,7 +31,7 @@ export default function FallDetail() {
   const [listeOffen, setListeOffen] = useState(false);
   const insets = useSafeAreaInsets();
 
-  if (!f) return <Absatz>Fallbeispiel nicht gefunden.</Absatz>;
+  if (!f) return geladen ? <Absatz>Fallbeispiel nicht gefunden.</Absatz> : null;
 
   const aktiv = f.checkliste.filter((c) => !abgewaehlt[c.id]);
 
@@ -192,6 +193,7 @@ export default function FallDetail() {
         ))}
       </Karte>
 
+      {f.eigenes && <FallTeilen fall={f} />}
 
       <View style={{ flexDirection: 'row', gap: abstand.m }}>
         <Knopf

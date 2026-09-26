@@ -1,5 +1,5 @@
 import Constants from 'expo-constants';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -106,6 +106,7 @@ export default function EinstellungenSeite() {
           Fälle.
         </Absatz>
         <View style={{ gap: abstand.s, marginTop: abstand.m }}>
+          <Knopf titel="💾 Sicherung & Import" art="tonal" onPress={() => router.push('/daten')} />
           <Knopf
             titel="Alle Einsätze löschen"
             art="sekundaer"
