@@ -14,6 +14,12 @@ function balkenFarbe(anteil: number) {
   return '#C62828';
 }
 
+/** Frühester Zeitpunkt, zu dem ein Punkt live abgehakt wurde */
+function zeitpunkt(d: Durchgang, itemId: string): number | undefined {
+  const zeiten = d.bewertungen.map((b) => b.zeiten?.[itemId]).filter((z): z is number => z !== undefined);
+  return zeiten.length ? Math.min(...zeiten) : undefined;
+}
+
 function alsText(d: Durchgang): string {
   const g = gesamt(d);
   const zeilen = [
@@ -22,7 +28,10 @@ function alsText(d: Durchgang): string {
     `⏱ Dauer: ${d.ende ? dauer(d.ende - d.start) : '–'}`,
     `⭐ Ergebnis: ${g.durchschnittProzent}% (${g.durchschnittPunkte}/${g.maxPunkte} Punkte, ${g.anzahl} Bewertungen)`,
     '',
-    ...d.checkliste.map((c) => `${g.proPunkt[c.id] >= 0.5 ? '✅' : '❌'} ${c.text} (${Math.round(g.proPunkt[c.id] * 100)}%)`),
+    ...d.checkliste.map((c) => {
+      const z = zeitpunkt(d, c.id);
+      return `${g.proPunkt[c.id] >= 0.5 ? '✅' : '❌'} ${c.text} (${Math.round(g.proPunkt[c.id] * 100)}%${z !== undefined ? `, nach ${dauer(z)}` : ''})`;
+    }),
   ];
   const notizen = d.bewertungen.filter((b) => b.notiz);
   if (notizen.length) zeilen.push('', '💬 Feedback:', ...notizen.map((b) => `– ${b.name}: ${b.notiz}`));
@@ -82,6 +91,7 @@ export default function Ergebnis() {
         <Absatz leise>Balken = Anteil der Zuschauer:innen, die den Punkt gesehen haben.</Absatz>
         {d.checkliste.map((c) => {
           const anteil = g.proPunkt[c.id];
+          const z = zeitpunkt(d, c.id);
           return (
             <View key={c.id} style={styles.punkt}>
               <View style={styles.punktKopf}>
@@ -93,7 +103,9 @@ export default function Ergebnis() {
               <View style={styles.balkenHg}>
                 <View style={[styles.balken, { width: `${Math.round(anteil * 100)}%`, backgroundColor: balkenFarbe(anteil) }]} />
               </View>
-              <Text style={styles.anteil}>{Math.round(anteil * 100)}%</Text>
+              <Text style={styles.anteil}>
+                {Math.round(anteil * 100)}%{z !== undefined ? `  ·  ⏱ nach ${dauer(z)}` : ''}
+              </Text>
             </View>
           );
         })}

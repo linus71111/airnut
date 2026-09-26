@@ -15,6 +15,8 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
   - **Messen-Modus**: Werte sind verdeckt und erscheinen erst, wenn die Helfer:innen sie
     „messen“ (antippen) – so muss man wirklich nachfragen/messen.
 - **Timer** für den Durchgang, Bildschirm bleibt dabei an.
+- **Live-Bewertung** schon während der Übung (Reiter „Live-Bewertung“), mit Zeit seit Start für jeden Punkt.
+  Beim Beenden wird sie automatisch als Bewertung übernommen.
 - **Bewertung**: Jede:r Zuschauer:in hakt die Checkliste ab (Punkte, „WICHTIG“-Punkte) und kann Feedback schreiben.
 - **Ergebnis**: Prozent, Note, vergessene wichtige Punkte, Balken pro Prüfpunkt, Feedback –
   und **Teilen** (z.B. in die WhatsApp-Gruppe).
@@ -24,23 +26,42 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
   Einsätzen, Durchschnitt, bestem Ergebnis, Ergebnis je Schwierigkeit, „Klappt schon gut“ und „Daran noch arbeiten“.
 - **Einsatz-Historie** aller Durchgänge, filterbar nach Schwierigkeit und Person.
 - **Eigene Fallbeispiele** erstellen oder vorhandene als Vorlage kopieren.
+- **Burger-Menü (☰)** oben rechts mit allen Bereichen und direktem Zugriff auf die Akten, **Zurück-Knopf** oben links.
 - Alles wird auf dem Handy gespeichert (kein Internet nötig).
 
 > ⚠️ Die Inhalte sind Übungsmaterial. Bitte vor dem Einsatz mit euren Ausbilder:innen abstimmen.
 
-## Loslegen (auf deinem Computer)
+## Auf dem Handy testen
 
-Du brauchst [Node.js](https://nodejs.org) (Version 20 oder neuer) und auf dem Handy die App **Expo Go**
-(im App Store / Play Store).
+Du brauchst einen Computer (Windows, Mac oder Linux) und dein Handy im **selben WLAN**.
 
-```bash
-cd fallbeispiel-app
-npm install
-npx expo start
-```
+1. **Auf dem Computer installieren:**
+   - [Node.js](https://nodejs.org) (die „LTS“-Version)
+   - [Git](https://git-scm.com/downloads)
+2. **Auf dem Handy installieren:** die App **Expo Go** (App Store bzw. Google Play Store).
+3. **Code herunterladen** – im Terminal (Windows: „Eingabeaufforderung“ oder „PowerShell“):
+   ```bash
+   git clone https://github.com/linus71111/airnut.git
+   cd airnut
+   git checkout claude/fallball-app-dlrg-bdf20o
+   cd fallbeispiel-app
+   npm install
+   ```
+4. **App starten:**
+   ```bash
+   npx expo start
+   ```
+   Es erscheint ein QR-Code im Terminal.
+5. **QR-Code scannen:**
+   - Android: in der App Expo Go auf „Scan QR code“ tippen.
+   - iPhone: mit der normalen Kamera-App scannen und auf den Link tippen.
 
-Dann den QR-Code mit dem Handy scannen (Android: in Expo Go, iPhone: mit der Kamera) – die App startet sofort.
-Mit `npx expo start --web` kannst du sie auch im Browser ausprobieren.
+Die App öffnet sich in Expo Go. Wenn du am Code etwas änderst, aktualisiert sie sich sofort.
+
+**Probleme?**
+- *Handy findet den Computer nicht* (z.B. anderes WLAN, Schul-/Firmen-WLAN): `npx expo start --tunnel` verwenden.
+- *Expo Go meldet eine falsche Version*: Expo Go im Store aktualisieren. Die App nutzt Expo SDK 57.
+- Mit `npx expo start --web` läuft die App auch im Browser am Computer.
 
 ## Echte App bauen (für App Store / Play Store)
 

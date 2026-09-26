@@ -1,10 +1,10 @@
-import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Absatz, Badge, Checkbox, Eingabe, Karte, Knopf } from '../../components/ui';
+import { ChecklistEingabe } from '../../components/ChecklistEingabe';
+import { Absatz, Eingabe, Karte, Knopf } from '../../components/ui';
 import { neueId } from '../../lib/score';
 import { useStore } from '../../lib/store';
 import { abstand, farben } from '../../theme';
@@ -21,13 +21,7 @@ export default function Bewerten() {
 
   if (!d) return <Absatz>Durchgang nicht gefunden.</Absatz>;
 
-  const umschalten = (itemId: string) => {
-    if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
-    setErledigt((e) => ({ ...e, [itemId]: !e[itemId] }));
-  };
-
   const anzahl = d.checkliste.filter((c) => erledigt[c.id]).length;
-  const kategorien = [...new Set(d.checkliste.map((c) => c.kategorie))];
 
   const absenden = () => {
     fuegeBewertungHinzu(d.id, {
@@ -50,27 +44,11 @@ export default function Bewerten() {
         <Eingabe label="Dein Name" value={name} onChangeText={setName} placeholder="optional" />
       </Karte>
 
-      {kategorien.map((k) => (
-        <Karte key={k}>
-          <Text style={styles.kategorie}>{k}</Text>
-          {d.checkliste
-            .filter((c) => c.kategorie === k)
-            .map((c) => (
-              <Checkbox
-                key={c.id}
-                an={!!erledigt[c.id]}
-                onPress={() => umschalten(c.id)}
-                text={c.text}
-                unterText={
-                  <View style={{ flexDirection: 'row', gap: 4, marginTop: 4 }}>
-                    {c.kritisch && <Badge text="WICHTIG" />}
-                    <Badge text={`${c.punkte} P`} farbe="#5F6368" />
-                  </View>
-                }
-              />
-            ))}
-        </Karte>
-      ))}
+      <ChecklistEingabe
+        checkliste={d.checkliste}
+        erledigt={erledigt}
+        onUmschalten={(itemId) => setErledigt((e) => ({ ...e, [itemId]: !e[itemId] }))}
+      />
 
       <Karte>
         <Eingabe
@@ -89,5 +67,4 @@ export default function Bewerten() {
 
 const styles = StyleSheet.create({
   titel: { fontSize: 22, fontWeight: '900', color: farben.text, marginBottom: 4 },
-  kategorie: { fontSize: 13, fontWeight: '800', color: farben.rot, textTransform: 'uppercase' },
 });

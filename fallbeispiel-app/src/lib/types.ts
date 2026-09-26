@@ -48,8 +48,18 @@ export type Bewertung = {
   id: string;
   name: string;
   erledigt: Record<string, boolean>;
+  /** Zeitpunkt (ms seit Start des Durchgangs), wann ein Punkt live abgehakt wurde */
+  zeiten?: Record<string, number>;
   notiz: string;
   zeit: number;
+};
+
+/** Bewertung, die während der laufenden Übung live mitgeführt wird */
+export type LiveBewertung = {
+  name: string;
+  erledigt: Record<string, boolean>;
+  zeiten: Record<string, number>;
+  notiz: string;
 };
 
 export type Durchgang = {
@@ -66,6 +76,7 @@ export type Durchgang = {
   /** Kopie der Checkliste, damit alte Ergebnisse stimmen, auch wenn der Fall später geändert wird */
   checkliste: CheckItem[];
   bewertungen: Bewertung[];
+  live?: LiveBewertung;
 };
 
 export type Person = {
