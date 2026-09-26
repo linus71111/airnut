@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "DLRG Fallbeispiel",
+    "slug": "dlrg-fallbeispiel",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "de.jet.fallbeispiel"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E2001A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "de.jet.fallbeispiel"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "scheme": "fallbeispiel"
+  }
+}
