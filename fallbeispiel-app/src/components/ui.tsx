@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
 
+import { SCHWIERIGKEIT_INFO } from '../lib/schwierigkeit';
+import type { Schwierigkeit } from '../lib/types';
 import { abstand, farben } from '../theme';
 
 type ButtonArt = 'primaer' | 'sekundaer' | 'gefahr' | 'gelb';
@@ -118,3 +120,9 @@ const styles = StyleSheet.create({
   badge: { borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2, alignSelf: 'flex-start' },
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '800' },
 });
+
+export function SchwierigkeitBadge({ stufe }: { stufe?: Schwierigkeit }) {
+  if (!stufe) return null;
+  const info = SCHWIERIGKEIT_INFO[stufe];
+  return <Badge text={info.label.toUpperCase()} farbe={info.farbe} />;
+}

@@ -1,5 +1,5 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Absatz, Badge, Karte, Knopf, Ueberschrift } from '../../components/ui';
@@ -31,7 +31,7 @@ function alsText(d: Durchgang): string {
 
 export default function Ergebnis() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { durchgang } = useStore();
+  const { durchgang, person } = useStore();
   const d = durchgang(id);
   const insets = useSafeAreaInsets();
 
@@ -54,6 +54,19 @@ export default function Ergebnis() {
           {d.ende ? ` · ${dauer(d.ende - d.start)} min` : ''}
         </Text>
       </View>
+
+      {(d.helferIds ?? []).some((pid) => person(pid)) && (
+        <View style={styles.helfer}>
+          {(d.helferIds ?? []).map((pid) => {
+            const p = person(pid);
+            return p ? (
+              <Pressable key={pid} onPress={() => router.push(`/personen/${pid}`)} style={styles.helferChip}>
+                <Text style={styles.helferText}>📁 Akte {p.name}</Text>
+              </Pressable>
+            ) : null;
+          })}
+        </View>
+      )}
 
       {kritischVergessen.length > 0 && (
         <Karte stil={{ borderColor: '#C62828', borderWidth: 2 }}>
@@ -115,4 +128,7 @@ const styles = StyleSheet.create({
   balken: { height: 8, borderRadius: 4 },
   anteil: { fontSize: 12, color: farben.textLeise, marginTop: 2 },
   feedbackName: { fontWeight: '800', color: farben.text },
+  helfer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },
+  helferChip: { backgroundColor: farben.karte, borderColor: farben.rot, borderWidth: 2, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6 },
+  helferText: { color: farben.rot, fontWeight: '800' },
 });

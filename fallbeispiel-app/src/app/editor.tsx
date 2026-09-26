@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Absatz, Eingabe, Karte, Knopf, Ueberschrift } from '../components/ui';
 import { neueId } from '../lib/score';
 import { useStore } from '../lib/store';
+import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import type { CheckItem, Fallbeispiel, Kategorie, Vitalwerte } from '../lib/types';
 import { BEWUSSTSEIN_STUFEN, NORMALWERTE, VITAL_DEFS } from '../lib/vitals';
 import { abstand, farben } from '../theme';
@@ -15,6 +16,7 @@ const KATEGORIEN: Kategorie[] = ['Eigenschutz', 'Erstkontakt', 'Notruf', 'Maßna
 const LEERER_FALL: Fallbeispiel = {
   id: '',
   titel: '',
+  schwierigkeit: 'leicht',
   kurz: '',
   lage: '',
   mimeAnleitung: '',
@@ -62,6 +64,12 @@ export default function Editor() {
 
       <Karte>
         <Eingabe label="Titel *" value={f.titel} onChangeText={(t) => setze('titel', t)} placeholder="z.B. Bienenstich im Hals" />
+        <Text style={[styles.klein, { marginBottom: 2 }]}>SCHWIERIGKEIT</Text>
+        <View style={[styles.chips, { marginBottom: abstand.m }]}>
+          {SCHWIERIGKEITEN.map((st) => (
+            <Chip key={st} text={SCHWIERIGKEIT_INFO[st].label} an={f.schwierigkeit === st} onPress={() => setze('schwierigkeit', st)} />
+          ))}
+        </View>
         <Eingabe label="Kurzbeschreibung" value={f.kurz} onChangeText={(t) => setze('kurz', t)} />
         <Eingabe label="Lage (wird vorgelesen)" value={f.lage} onChangeText={(t) => setze('lage', t)} multiline />
         <Eingabe label="Anleitung für die Mime" value={f.mimeAnleitung} onChangeText={(t) => setze('mimeAnleitung', t)} multiline />

@@ -36,6 +36,7 @@ const ENDE: Punkt[] = [
 export const STANDARD_FAELLE: Fallbeispiel[] = [
   {
     id: 'ertrinken-bewusstlos',
+    schwierigkeit: 'mittel',
     titel: 'Ertrinkungsunfall – bewusstlos mit Atmung',
     kurz: 'Badegast wurde aus dem Wasser gezogen, atmet aber.',
     lage:
@@ -78,6 +79,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'reanimation',
+    schwierigkeit: 'schwer',
     titel: 'Herz-Kreislauf-Stillstand am Beckenrand',
     kurz: 'Älterer Badegast bricht zusammen – keine normale Atmung.',
     lage:
@@ -113,6 +115,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'unterzucker',
+    schwierigkeit: 'leicht',
     titel: 'Unterzuckerung beim Training',
     kurz: 'Jugendliche mit Diabetes wird zittrig und verwirrt.',
     lage:
@@ -149,6 +152,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'schnittwunde',
+    schwierigkeit: 'leicht',
     titel: 'Starke Blutung am Unterarm',
     kurz: 'Schnitt an einer Glasscherbe, es blutet stark.',
     lage:
@@ -179,6 +183,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'allergie',
+    schwierigkeit: 'mittel',
     titel: 'Wespenstich mit allergischer Reaktion',
     kurz: 'Stich beim Eisessen – Schwellung, Atemnot.',
     lage:
@@ -210,6 +215,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'wirbelsaeule',
+    schwierigkeit: 'schwer',
     titel: 'Kopfsprung ins flache Wasser',
     kurz: 'Verdacht auf Wirbelsäulenverletzung.',
     lage:
@@ -240,6 +246,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'hitze',
+    schwierigkeit: 'leicht',
     titel: 'Sonnenstich am Wachturm',
     kurz: 'Kopfschmerzen, Übelkeit nach langem Aufenthalt in der Sonne.',
     lage:
@@ -270,6 +277,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'unterkuehlung',
+    schwierigkeit: 'mittel',
     titel: 'Unterkühlung nach langem Schwimmen',
     kurz: 'Schwimmer kommt zitternd aus dem kalten See.',
     lage:
@@ -300,6 +308,7 @@ export const STANDARD_FAELLE: Fallbeispiel[] = [
   },
   {
     id: 'krampfanfall',
+    schwierigkeit: 'mittel',
     titel: 'Krampfanfall am Beckenrand',
     kurz: 'Person stürzt und krampft.',
     lage:

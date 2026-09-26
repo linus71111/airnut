@@ -1,10 +1,10 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { VitalMonitor } from '../../components/VitalMonitor';
-import { Absatz, Badge, Eingabe, Karte, Knopf, Ueberschrift } from '../../components/ui';
+import { Absatz, Badge, Eingabe, Karte, Knopf, SchwierigkeitBadge, Ueberschrift } from '../../components/ui';
 import { bestaetigen } from '../../lib/bestaetigen';
 import { neueId } from '../../lib/score';
 import { useStore } from '../../lib/store';
@@ -12,20 +12,35 @@ import { abstand, farben } from '../../theme';
 
 export default function FallDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { fall, speichereDurchgang, loescheFall } = useStore();
+  const { fall, speichereDurchgang, loescheFall, personen, speicherePerson } = useStore();
   const f = fall(id);
   const [team, setTeam] = useState('');
+  const [helfer, setHelfer] = useState<string[]>([]);
+  const [neuerName, setNeuerName] = useState('');
   const [mimeZeigen, setMimeZeigen] = useState(false);
   const insets = useSafeAreaInsets();
 
   if (!f) return <Absatz>Fallbeispiel nicht gefunden.</Absatz>;
 
+  const umschalten = (pid: string) => setHelfer((h) => (h.includes(pid) ? h.filter((x) => x !== pid) : [...h, pid]));
+
+  const personAnlegen = () => {
+    if (!neuerName.trim()) return;
+    const pid = neueId();
+    speicherePerson({ id: pid, name: neuerName.trim(), notiz: '', erstellt: Date.now() });
+    setHelfer((h) => [...h, pid]);
+    setNeuerName('');
+  };
+
   const starten = () => {
+    const namen = personen.filter((p) => helfer.includes(p.id)).map((p) => p.name);
     const d = {
       id: neueId(),
       fallId: f.id,
       fallTitel: f.titel,
-      team: team.trim() || 'Team 1',
+      schwierigkeit: f.schwierigkeit,
+      helferIds: helfer,
+      team: team.trim() || namen.join(' & ') || 'Team 1',
       start: Date.now(),
       checkliste: f.checkliste,
       bewertungen: [],
@@ -40,6 +55,9 @@ export default function FallDetail() {
     <ScrollView contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}>
       <Stack.Screen options={{ title: 'Fallbeispiel' }} />
       <Text style={styles.titel}>{f.titel}</Text>
+      <View style={{ flexDirection: 'row', marginTop: -abstand.s, marginBottom: abstand.m }}>
+        <SchwierigkeitBadge stufe={f.schwierigkeit} />
+      </View>
 
       <Karte stil={{ borderLeftWidth: 5, borderLeftColor: farben.gelb }}>
         <Ueberschrift>📢 Lage (vorlesen)</Ueberschrift>
@@ -93,7 +111,27 @@ export default function FallDetail() {
 
       <Karte stil={{ backgroundColor: '#FFF8D6' }}>
         <Ueberschrift>Durchgang starten</Ueberschrift>
-        <Eingabe label="Team / Helfer:innen" value={team} onChangeText={setTeam} placeholder="z.B. Lisa & Tom" />
+        <Text style={styles.label}>Wer hilft? (antippen)</Text>
+        <View style={styles.chips}>
+          {personen.map((p) => {
+            const an = helfer.includes(p.id);
+            return (
+              <Pressable key={p.id} onPress={() => umschalten(p.id)} style={[styles.chip, an && styles.chipAn]}>
+                <Text style={[styles.chipText, an && { color: '#fff' }]}>
+                  {an ? '✓ ' : ''}
+                  {p.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <View style={styles.neu}>
+          <View style={{ flex: 1 }}>
+            <Eingabe label="Neue Person" value={neuerName} onChangeText={setNeuerName} placeholder="Name" onSubmitEditing={personAnlegen} />
+          </View>
+          <Knopf titel="+" onPress={personAnlegen} deaktiviert={!neuerName.trim()} stil={{ marginBottom: abstand.m, paddingHorizontal: 22 }} />
+        </View>
+        <Eingabe label="Teamname (optional)" value={team} onChangeText={setTeam} placeholder="sonst die Namen der Helfer:innen" />
         <Knopf titel="▶ Start" onPress={starten} />
       </Karte>
 
@@ -127,4 +165,10 @@ const styles = StyleSheet.create({
   kategorie: { fontSize: 13, fontWeight: '800', color: farben.rot, textTransform: 'uppercase', marginTop: 6 },
   punkt: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, paddingVertical: 4 },
   punktText: { flex: 1, fontSize: 15, lineHeight: 21, color: farben.text },
+  label: { fontSize: 13, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: abstand.m },
+  chip: { borderWidth: 1, borderColor: farben.rand, backgroundColor: '#fff', borderRadius: 18, paddingHorizontal: 12, paddingVertical: 7 },
+  chipAn: { backgroundColor: farben.gruen, borderColor: farben.gruen },
+  chipText: { fontSize: 15, fontWeight: '600', color: farben.text },
+  neu: { flexDirection: 'row', gap: abstand.s, alignItems: 'flex-end' },
 });

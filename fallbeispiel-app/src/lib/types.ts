@@ -24,9 +24,12 @@ export type CheckItem = {
   kritisch?: boolean;
 };
 
+export type Schwierigkeit = 'leicht' | 'mittel' | 'schwer';
+
 export type Fallbeispiel = {
   id: string;
   titel: string;
+  schwierigkeit: Schwierigkeit;
   kurz: string;
   /** Was die Helfer:innen beim Eintreffen vorfinden – wird vorgelesen */
   lage: string;
@@ -53,10 +56,22 @@ export type Durchgang = {
   id: string;
   fallId: string;
   fallTitel: string;
+  schwierigkeit?: Schwierigkeit;
+  /** Anzeigename des Teams (Namen der Helfer:innen) */
   team: string;
+  /** IDs der Helfer:innen aus der Personenliste */
+  helferIds?: string[];
   start: number;
   ende?: number;
   /** Kopie der Checkliste, damit alte Ergebnisse stimmen, auch wenn der Fall später geändert wird */
   checkliste: CheckItem[];
   bewertungen: Bewertung[];
+};
+
+export type Person = {
+  id: string;
+  name: string;
+  /** z.B. Ausbildungsstand, Gruppe */
+  notiz: string;
+  erstellt: number;
 };

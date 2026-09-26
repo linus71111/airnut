@@ -18,8 +18,13 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 - **Bewertung**: Jede:r Zuschauer:in hakt die Checkliste ab (Punkte, „WICHTIG“-Punkte) und kann Feedback schreiben.
 - **Ergebnis**: Prozent, Note, vergessene wichtige Punkte, Balken pro Prüfpunkt, Feedback –
   und **Teilen** (z.B. in die WhatsApp-Gruppe).
+- **Schwierigkeit** leicht / mittel / schwer für jeden Fall, mit Filter auf der Startseite.
+- **Anleitung**: Rollen, Ablauf Schritt für Schritt, Nachbesprechung und Sicherheitsregeln.
+- **Helfer:innen mit eigener Akte**: Beim Start wählt man aus, wer hilft. Jede Person hat eine Akte mit allen
+  Einsätzen, Durchschnitt, bestem Ergebnis, Ergebnis je Schwierigkeit, „Klappt schon gut“ und „Daran noch arbeiten“.
+- **Einsatz-Historie** aller Durchgänge, filterbar nach Schwierigkeit und Person.
 - **Eigene Fallbeispiele** erstellen oder vorhandene als Vorlage kopieren.
-- **Verlauf** aller Durchgänge. Alles wird auf dem Handy gespeichert (kein Internet nötig).
+- Alles wird auf dem Handy gespeichert (kein Internet nötig).
 
 > ⚠️ Die Inhalte sind Übungsmaterial. Bitte vor dem Einsatz mit euren Ausbilder:innen abstimmen.
 
@@ -61,6 +66,9 @@ Die Paketnamen stehen in `app.json` (`de.jet.fallbeispiel`) – ändert sie ggf.
 | `src/app/bewerten/[id].tsx` | Checkliste für Zuschauer:innen |
 | `src/app/ergebnis/[id].tsx` | Auswertung |
 | `src/app/editor.tsx` | Eigene Fälle anlegen/bearbeiten |
+| `src/app/anleitung.tsx` | Anleitung zum Ablauf eines Fallbeispiels |
+| `src/app/personen/` | Liste der Helfer:innen und ihre Akte |
+| `src/app/verlauf.tsx` | Einsatz-Historie |
 | `src/data/faelle.ts` | **Die fertigen Fallbeispiele – hier könnt ihr Texte & Checklisten anpassen** |
 | `src/lib/vitals.ts` | Normbereiche der Vitalwerte |
 | `src/components/VitalMonitor.tsx` | Der Patientenmonitor |

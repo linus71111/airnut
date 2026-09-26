@@ -62,3 +62,56 @@ export function dauer(ms: number): string {
 export function neueId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
+
+export type AkteEintrag = { durchgang: Durchgang; prozent: number };
+
+export type Akte = {
+  eintraege: AkteEintrag[];
+  /** Durchschnitt nur über bewertete Einsätze */
+  durchschnitt: number | null;
+  bestes: number | null;
+  /** Durchschnitt je Schwierigkeit */
+  proSchwierigkeit: Partial<Record<string, number>>;
+  /** Prüfpunkte, die gefehlt haben (von weniger als 50% der Zuschauer:innen gesehen), häufigste zuerst */
+  oftVergessen: { text: string; anzahl: number }[];
+  /** Prüfpunkte, die mindestens zweimal geklappt haben */
+  staerken: { text: string; anzahl: number }[];
+};
+
+export function akte(personId: string, durchgaenge: Durchgang[]): Akte {
+  const eigene = durchgaenge.filter((d) => d.helferIds?.includes(personId)).sort((a, b) => b.start - a.start);
+  const eintraege = eigene.map((d) => ({ durchgang: d, prozent: gesamt(d).durchschnittProzent }));
+  const bewertet = eintraege.filter((e) => e.durchgang.bewertungen.length > 0);
+  const schnitt = (liste: AkteEintrag[]) => (liste.length ? Math.round(liste.reduce((s, e) => s + e.prozent, 0) / liste.length) : null);
+
+  const proSchwierigkeit: Partial<Record<string, number>> = {};
+  for (const s of ['leicht', 'mittel', 'schwer']) {
+    const w = schnitt(bewertet.filter((e) => e.durchgang.schwierigkeit === s));
+    if (w !== null) proSchwierigkeit[s] = w;
+  }
+
+  const vergessen = new Map<string, number>();
+  const geschafft = new Map<string, number>();
+  for (const { durchgang: d } of bewertet) {
+    const g = gesamt(d);
+    for (const c of d.checkliste) {
+      const ziel = g.proPunkt[c.id] < 0.5 ? vergessen : geschafft;
+      ziel.set(c.text, (ziel.get(c.text) ?? 0) + 1);
+    }
+  }
+  const top = (m: Map<string, number>, min: number) =>
+    [...m.entries()]
+      .filter(([, n]) => n >= min)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([text, anzahl]) => ({ text, anzahl }));
+
+  return {
+    eintraege,
+    durchschnitt: schnitt(bewertet),
+    bestes: bewertet.length ? Math.max(...bewertet.map((e) => e.prozent)) : null,
+    proSchwierigkeit,
+    oftVergessen: top(vergessen, 1),
+    staerken: top(geschafft, 2),
+  };
+}

@@ -2,15 +2,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { STANDARD_FAELLE } from '../data/faelle';
-import type { Bewertung, Durchgang, Fallbeispiel } from './types';
+import type { Bewertung, Durchgang, Fallbeispiel, Person } from './types';
 
 const KEY_FAELLE = 'fallbeispiel.eigeneFaelle.v1';
 const KEY_DURCHGAENGE = 'fallbeispiel.durchgaenge.v1';
+const KEY_PERSONEN = 'fallbeispiel.personen.v1';
 
 type Store = {
   geladen: boolean;
   faelle: Fallbeispiel[];
   durchgaenge: Durchgang[];
+  personen: Person[];
   fall: (id: string) => Fallbeispiel | undefined;
   durchgang: (id: string) => Durchgang | undefined;
   speichereFall: (f: Fallbeispiel) => void;
@@ -18,6 +20,9 @@ type Store = {
   speichereDurchgang: (d: Durchgang) => void;
   loescheDurchgang: (id: string) => void;
   fuegeBewertungHinzu: (durchgangId: string, b: Bewertung) => void;
+  person: (id: string) => Person | undefined;
+  speicherePerson: (p: Person) => void;
+  loeschePerson: (id: string) => void;
 };
 
 const StoreContext = createContext<Store | null>(null);
@@ -26,13 +31,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [geladen, setGeladen] = useState(false);
   const [eigene, setEigene] = useState<Fallbeispiel[]>([]);
   const [durchgaenge, setDurchgaenge] = useState<Durchgang[]>([]);
+  const [personen, setPersonen] = useState<Person[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [f, d] = await Promise.all([AsyncStorage.getItem(KEY_FAELLE), AsyncStorage.getItem(KEY_DURCHGAENGE)]);
-        if (f) setEigene(JSON.parse(f));
+        const [f, d, p] = await Promise.all([
+          AsyncStorage.getItem(KEY_FAELLE),
+          AsyncStorage.getItem(KEY_DURCHGAENGE),
+          AsyncStorage.getItem(KEY_PERSONEN),
+        ]);
+        // Ältere eigene Fälle haben noch keine Schwierigkeit
+        if (f) setEigene(JSON.parse(f).map((x: Fallbeispiel) => ({ ...x, schwierigkeit: x.schwierigkeit ?? 'mittel' })));
         if (d) setDurchgaenge(JSON.parse(d));
+        if (p) setPersonen(JSON.parse(p));
       } catch (e) {
         console.warn('Laden fehlgeschlagen', e);
       } finally {
@@ -48,6 +60,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (geladen) AsyncStorage.setItem(KEY_DURCHGAENGE, JSON.stringify(durchgaenge)).catch(() => {});
   }, [durchgaenge, geladen]);
+  useEffect(() => {
+    if (geladen) AsyncStorage.setItem(KEY_PERSONEN, JSON.stringify(personen)).catch(() => {});
+  }, [personen, geladen]);
 
   const faelle = useMemo(() => [...eigene, ...STANDARD_FAELLE], [eigene]);
 
@@ -69,9 +84,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setDurchgaenge((alt) => alt.map((d) => (d.id === durchgangId ? { ...d, bewertungen: [...d.bewertungen, b] } : d)));
   }, []);
 
+  const person = useCallback((id: string) => personen.find((p) => p.id === id), [personen]);
+  const speicherePerson = useCallback((p: Person) => {
+    setPersonen((alt) =>
+      (alt.some((x) => x.id === p.id) ? alt.map((x) => (x.id === p.id ? p : x)) : [...alt, p]).sort((a, b) => a.name.localeCompare(b.name, 'de')),
+    );
+  }, []);
+  // Einsätze bleiben erhalten, der Name steht weiterhin im Team-Namen
+  const loeschePerson = useCallback((id: string) => setPersonen((alt) => alt.filter((x) => x.id !== id)), []);
+
   const wert = useMemo(
-    () => ({ geladen, faelle, durchgaenge, fall, durchgang, speichereFall, loescheFall, speichereDurchgang, loescheDurchgang, fuegeBewertungHinzu }),
-    [geladen, faelle, durchgaenge, fall, durchgang, speichereFall, loescheFall, speichereDurchgang, loescheDurchgang, fuegeBewertungHinzu],
+    () => ({
+      geladen,
+      faelle,
+      durchgaenge,
+      personen,
+      fall,
+      durchgang,
+      speichereFall,
+      loescheFall,
+      speichereDurchgang,
+      loescheDurchgang,
+      fuegeBewertungHinzu,
+      person,
+      speicherePerson,
+      loeschePerson,
+    }),
+    [geladen, faelle, durchgaenge, personen, fall, durchgang, speichereFall, loescheFall, speichereDurchgang, loescheDurchgang, fuegeBewertungHinzu, person, speicherePerson, loeschePerson],
   );
 
   return <StoreContext.Provider value={wert}>{children}</StoreContext.Provider>;
