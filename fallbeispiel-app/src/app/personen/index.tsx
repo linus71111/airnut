@@ -1,24 +1,17 @@
 import { router, Stack } from 'expo-router';
-import { useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Eingabe, Karte, Knopf } from '../../components/ui';
-import { akte, neueId, note } from '../../lib/score';
+import { PersonAnlegen, QualifikationBadge } from '../../components/PersonAnlegen';
+import { Karte } from '../../components/ui';
+import { akte, note } from '../../lib/score';
 import { useStore } from '../../lib/store';
 import { abstand, kartenStil, macheStile } from '../../theme';
 
 export default function Personen() {
   const styles = useStyles();
-  const { personen, durchgaenge, speicherePerson } = useStore();
-  const [name, setName] = useState('');
+  const { personen, durchgaenge } = useStore();
   const insets = useSafeAreaInsets();
-
-  const anlegen = () => {
-    if (!name.trim()) return;
-    speicherePerson({ id: neueId(), name: name.trim(), notiz: '', erstellt: Date.now() });
-    setName('');
-  };
 
   return (
     <FlatList
@@ -30,8 +23,7 @@ export default function Personen() {
         <>
           <Stack.Screen options={{ title: 'Helfer:innen' }} />
           <Karte>
-            <Eingabe label="Neue Person" value={name} onChangeText={setName} placeholder="Vor- und Nachname" onSubmitEditing={anlegen} />
-            <Knopf titel="+ Hinzufügen" onPress={anlegen} deaktiviert={!name.trim()} />
+            <PersonAnlegen />
           </Karte>
         </>
       }
@@ -46,7 +38,10 @@ export default function Personen() {
               <Text style={styles.avatarText}>{p.name.slice(0, 1).toUpperCase()}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{p.name}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <Text style={styles.name}>{p.name}</Text>
+                <QualifikationBadge wert={p.qualifikation} />
+              </View>
               <Text style={styles.meta}>
                 {a.eintraege.length} Einsätze{p.notiz ? ` · ${p.notiz}` : ''}
               </Text>

@@ -31,10 +31,15 @@ export default function Start() {
     <FlatList
       data={gefiltert}
       keyExtractor={(f) => f.id}
-      contentContainerStyle={{ padding: abstand.l, paddingTop: insets.top + abstand.l, paddingBottom: insets.bottom + 40 }}
+      contentContainerStyle={{ padding: abstand.l, paddingTop: insets.top + abstand.s, paddingBottom: insets.bottom + 40 }}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View>
+          <View style={styles.leiste}>
+            <Text style={styles.leisteText}>🛟 DLRG · Jugend-Einsatz-Team</Text>
+            <MenueKnopf imInhalt />
+          </View>
+
           <View style={styles.hero}>
             <View style={styles.heroZeile}>
               <View style={styles.heroIcon}>
@@ -42,9 +47,8 @@ export default function Start() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.heroTitel}>Fallbeispiel-Trainer</Text>
-                <Text style={styles.heroUnter}>Jugend-Einsatz-Team</Text>
+                <Text style={styles.heroUnter}>Übung macht sicher</Text>
               </View>
-              <MenueKnopf aufRot />
             </View>
             <Text style={styles.heroText}>
               Notfälle realistisch nachspielen, Vitalwerte ansagen und gemeinsam mit der Checkliste bewerten.
@@ -185,6 +189,8 @@ function FilterChip({ text, an, farbe, onPress }: { text: string; an: boolean; f
 }
 
 const useStyles = macheStile((farben) => ({
+  leiste: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 52, marginBottom: abstand.s },
+  leisteText: { fontSize: 13, fontWeight: '800', color: farben.textLeise, letterSpacing: 0.4 },
   hero: { backgroundColor: farben.rot, borderRadius: 22, padding: abstand.l, marginBottom: abstand.m, gap: abstand.m },
   heroZeile: { flexDirection: 'row', alignItems: 'center', gap: abstand.m },
   heroIcon: {

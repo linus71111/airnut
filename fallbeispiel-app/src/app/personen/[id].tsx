@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Absatz, Eingabe, Karte, Knopf, SchwierigkeitBadge, Ueberschrift } from '../../components/ui';
+import { QualifikationBadge, QualifikationWahl } from '../../components/PersonAnlegen';
 import { bestaetigen } from '../../lib/bestaetigen';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../../lib/schwierigkeit';
 import { akte, note } from '../../lib/score';
@@ -31,6 +32,10 @@ export default function PersonAkte() {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{p.name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+            <QualifikationBadge wert={p.qualifikation} />
+            {!p.qualifikation && <Text style={styles.fehlt}>Ausbildung fehlt</Text>}
+          </View>
           <Text style={styles.seit}>Dabei seit {new Date(p.erstellt).toLocaleDateString('de-DE')}</Text>
         </View>
       </View>
@@ -42,12 +47,16 @@ export default function PersonAkte() {
       </View>
 
       <Karte>
-        <Eingabe
-          label="Notiz (z.B. Ausbildungsstand)"
-          value={p.notiz}
-          onChangeText={(t) => speicherePerson({ ...p, notiz: t })}
-          placeholder="z.B. Juniorretter, EH-Kurs 2025"
-        />
+        <Text style={styles.label}>Ausbildung</Text>
+        <QualifikationWahl wert={p.qualifikation} onWahl={(q) => speicherePerson({ ...p, qualifikation: q })} />
+        <View style={{ marginTop: abstand.m }}>
+          <Eingabe
+            label="Notiz"
+            value={p.notiz}
+            onChangeText={(t) => speicherePerson({ ...p, notiz: t })}
+            placeholder="z.B. Juniorretter, Rettungsschwimmer Silber"
+          />
+        </View>
       </Karte>
 
       {Object.keys(a.proSchwierigkeit).length > 0 && (
@@ -149,6 +158,8 @@ const useStyles = macheStile((farben) => ({
   avatarText: { fontSize: 26, fontWeight: '900', color: farben.rot },
   name: { fontSize: 24, fontWeight: '900', color: farben.text },
   seit: { fontSize: 13, color: farben.textLeise },
+  fehlt: { fontSize: 12, fontWeight: '700', color: farben.orange },
+  label: { fontSize: 12, fontWeight: '700', color: farben.textLeise, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.6 },
   zahlen: { flexDirection: 'row', gap: abstand.s, marginBottom: abstand.m },
   zahl: { flex: 1, backgroundColor: farben.karte, borderRadius: 16, paddingVertical: abstand.m, alignItems: 'center', ...kartenStil(farben) },
   zahlWert: { fontSize: 24, fontWeight: '900', color: farben.text, fontVariant: ['tabular-nums'] },

@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PersonAnlegen } from '../../components/PersonAnlegen';
 import { VitalMonitor } from '../../components/VitalMonitor';
 import { Absatz, Badge, Eingabe, Karte, Knopf, SchwierigkeitBadge, Ueberschrift } from '../../components/ui';
 import { bestaetigen } from '../../lib/bestaetigen';
 import { neueId } from '../../lib/score';
+import { QUALIFIKATION_INFO } from '../../lib/qualifikation';
 import { useStore } from '../../lib/store';
 import type { Schwierigkeit } from '../../lib/types';
 import { oeffneZufallsFall } from '../../lib/zufall';
@@ -16,11 +18,11 @@ export default function FallDetail() {
   const styles = useStyles();
   const farben = useFarben();
   const { id, zufall, stufe } = useLocalSearchParams<{ id: string; zufall?: string; stufe?: Schwierigkeit }>();
-  const { fall, faelle, speichereDurchgang, loescheFall, personen, speicherePerson } = useStore();
+  const { fall, faelle, speichereDurchgang, loescheFall, personen } = useStore();
   const f = fall(id);
   const [team, setTeam] = useState('');
   const [helfer, setHelfer] = useState<string[]>([]);
-  const [neuerName, setNeuerName] = useState('');
+  const [neuOffen, setNeuOffen] = useState(false);
   /** Punkte, die in diesem Durchgang nicht bewertet werden */
   const [abgewaehlt, setAbgewaehlt] = useState<Record<string, boolean>>({});
   const [mimeZeigen, setMimeZeigen] = useState(false);
@@ -31,14 +33,6 @@ export default function FallDetail() {
   const aktiv = f.checkliste.filter((c) => !abgewaehlt[c.id]);
 
   const umschalten = (pid: string) => setHelfer((h) => (h.includes(pid) ? h.filter((x) => x !== pid) : [...h, pid]));
-
-  const personAnlegen = () => {
-    if (!neuerName.trim()) return;
-    const pid = neueId();
-    speicherePerson({ id: pid, name: neuerName.trim(), notiz: '', erstellt: Date.now() });
-    setHelfer((h) => [...h, pid]);
-    setNeuerName('');
-  };
 
   const starten = () => {
     const namen = personen.filter((p) => helfer.includes(p.id)).map((p) => p.name);
@@ -159,17 +153,26 @@ export default function FallDetail() {
                 <Text style={[styles.chipText, an && { color: '#fff' }]}>
                   {an ? '✓ ' : ''}
                   {p.name}
+                  {p.qualifikation ? <Text style={styles.chipQuali}> · {QUALIFIKATION_INFO[p.qualifikation].kurz}</Text> : null}
                 </Text>
               </Pressable>
             );
           })}
         </View>
-        <View style={styles.neu}>
-          <View style={{ flex: 1 }}>
-            <Eingabe label="Neue Person" value={neuerName} onChangeText={setNeuerName} placeholder="Name" onSubmitEditing={personAnlegen} />
+        {neuOffen ? (
+          <View style={styles.neu}>
+            <PersonAnlegen
+              onAngelegt={(pid) => {
+                setHelfer((h) => [...h, pid]);
+                setNeuOffen(false);
+              }}
+            />
           </View>
-          <Knopf titel="+" onPress={personAnlegen} deaktiviert={!neuerName.trim()} stil={{ marginBottom: abstand.m, paddingHorizontal: 22 }} />
-        </View>
+        ) : (
+          <Pressable onPress={() => setNeuOffen(true)} hitSlop={6} style={{ marginBottom: abstand.m }}>
+            <Text style={styles.neuLink}>+ Neue Person anlegen</Text>
+          </Pressable>
+        )}
         <Eingabe label="Teamname (optional)" value={team} onChangeText={setTeam} placeholder="sonst die Namen der Helfer:innen" />
         <Knopf titel={`▶ Start (${aktiv.length} Prüfpunkte)`} onPress={starten} deaktiviert={aktiv.length === 0} />
       </Karte>
@@ -223,5 +226,7 @@ const useStyles = macheStile((farben) => ({
   chip: { borderWidth: 1, borderColor: farben.rand, backgroundColor: farben.eingabe, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 7 },
   chipAn: { backgroundColor: farben.gruen, borderColor: farben.gruen },
   chipText: { fontSize: 15, fontWeight: '600', color: farben.text },
-  neu: { flexDirection: 'row', gap: abstand.s, alignItems: 'flex-end' },
+  neu: { backgroundColor: farben.karte, borderRadius: 14, padding: abstand.m, marginBottom: abstand.m },
+  neuLink: { color: farben.rot, fontWeight: '800', fontSize: 15 },
+  chipQuali: { fontWeight: '500', opacity: 0.75 },
 }));

@@ -24,7 +24,8 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 - **🎲 Zufallsfall** (Startseite und Menü, beachtet den Schwierigkeits-Filter, „Neu würfeln“ möglich).
 - **Schwierigkeit** leicht / mittel / schwer für jeden Fall, mit Filter auf der Startseite.
 - **Anleitung**: Rollen, Ablauf Schritt für Schritt, Nachbesprechung und Sicherheitsregeln.
-- **Helfer:innen mit eigener Akte**: Beim Start wählt man aus, wer hilft. Jede Person hat eine Akte mit allen
+- **Helfer:innen mit eigener Akte**: Beim Anlegen muss die Ausbildung gewählt werden (Erste-Hilfe-Kurs, San A, San B,
+  Rettungssanitäter). Beim Start wählt man aus, wer hilft. Jede Person hat eine Akte mit allen
   Einsätzen, Durchschnitt, bestem Ergebnis, Ergebnis je Schwierigkeit, „Klappt schon gut“ und „Daran noch arbeiten“.
 - **Einsatz-Historie** aller Durchgänge, filterbar nach Schwierigkeit und Person.
 - **Eigene Fallbeispiele** erstellen oder vorhandene als Vorlage kopieren.

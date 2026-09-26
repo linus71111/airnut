@@ -79,9 +79,14 @@ export type Durchgang = {
   live?: LiveBewertung;
 };
 
+/** Ausbildungsstand einer Person */
+export type Qualifikation = 'eh' | 'sanA' | 'sanB' | 'rs';
+
 export type Person = {
   id: string;
   name: string;
+  /** Fehlt bei Personen, die vor Einführung des Felds angelegt wurden */
+  qualifikation?: Qualifikation;
   /** z.B. Ausbildungsstand, Gruppe */
   notiz: string;
   erstellt: number;

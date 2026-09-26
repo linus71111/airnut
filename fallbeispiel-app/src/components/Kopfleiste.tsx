@@ -1,11 +1,11 @@
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useStore } from '../lib/store';
 import { oeffneZufallsFall } from '../lib/zufall';
-import { macheStile, useFarben } from '../theme';
+import { abstand, macheStile, useFarben } from '../theme';
 
 /** Gut sichtbarer Zurück-Knopf. Ohne Vorgänger (z.B. nach Neuladen im Browser) geht es zur Startseite. */
 export function ZurueckKnopf() {
@@ -23,8 +23,11 @@ export function ZurueckKnopf() {
   );
 }
 
-/** Burger-Menü (☰) mit allen Bereichen und den Akten der Helfer:innen. `aufRot`: weiße Variante für rote Flächen */
-export function MenueKnopf({ aufRot }: { aufRot?: boolean }) {
+/**
+ * Burger-Menü (☰) mit allen Bereichen und den Akten der Helfer:innen.
+ * `imInhalt`: steht nicht in der Kopfzeile, sondern im Seiteninhalt (Startseite) – dann ohne Randabstand.
+ */
+export function MenueKnopf({ imInhalt }: { imInhalt?: boolean }) {
   const styles = useStyles();
   const [offen, setOffen] = useState(false);
   const { personen, faelle } = useStore();
@@ -44,10 +47,10 @@ export function MenueKnopf({ aufRot }: { aufRot?: boolean }) {
         onPress={() => setOffen(true)}
         style={({ pressed }) => [
           styles.menueKnopf,
-          aufRot && { backgroundColor: 'rgba(255,255,255,0.18)', marginRight: 0 },
+          imInhalt && { marginRight: 0 },
           pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
         ]}>
-        <Text style={[styles.burger, aufRot && { color: '#fff' }]}>☰</Text>
+        <Text style={styles.burger}>☰</Text>
       </Pressable>
 
       <Modal visible={offen} transparent animationType="fade" onRequestClose={() => setOffen(false)}>
@@ -101,7 +104,15 @@ function Eintrag({ text, onPress, eingerueckt }: { text: string; onPress: () => 
 }
 
 const useStyles = macheStile((farben) => ({
-  zurueckKnopf: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 6, paddingVertical: 4 },
+  // Im Browser hat die Kopfzeile keinen eigenen Randabstand, auf dem Handy schon
+  zurueckKnopf: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginLeft: Platform.OS === 'web' ? abstand.m : 0,
+  },
   zurueckPfeil: { color: farben.rot, fontSize: 30, fontWeight: '300', marginTop: -3 },
   zurueck: { color: farben.rot, fontSize: 17, fontWeight: '700' },
   menueKnopf: {
@@ -111,7 +122,7 @@ const useStyles = macheStile((farben) => ({
     backgroundColor: farben.tonal,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8,
+    marginRight: Platform.OS === 'web' ? abstand.l : 0,
   },
   burger: { color: farben.rot, fontSize: 20, fontWeight: '800' },
   hintergrund: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'flex-end' },
