@@ -31,19 +31,20 @@ function Navigation() {
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style={farben.dunkel ? 'light' : 'dark'} />
       <Stack
         screenOptions={({ route }) => ({
-          headerStyle: { backgroundColor: farben.kopf },
-          headerTintColor: '#fff',
-          headerTitleStyle: { fontWeight: '800' },
+          headerStyle: { backgroundColor: farben.hintergrund },
+          headerTintColor: farben.text,
+          headerTitleStyle: { fontWeight: '800', fontSize: 17, color: farben.text },
+          headerTitleAlign: 'center',
           headerShadowVisible: false,
           contentStyle: { backgroundColor: farben.hintergrund },
           headerBackVisible: false,
           headerLeft: route.name === 'index' ? undefined : () => <ZurueckKnopf />,
           headerRight: () => <MenueKnopf />,
         })}>
-        <Stack.Screen name="index" options={{ title: 'Fallbeispiele' }} />
+        <Stack.Screen name="index" options={{ title: 'Fallbeispiele', headerShown: false }} />
       </Stack>
     </>
   );

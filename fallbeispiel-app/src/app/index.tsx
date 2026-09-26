@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MenueKnopf } from '../components/Kopfleiste';
 import { Badge, SchwierigkeitBadge } from '../components/ui';
 import { SCHWIERIGKEIT_INFO, SCHWIERIGKEITEN } from '../lib/schwierigkeit';
 import { useStore } from '../lib/store';
@@ -30,7 +31,7 @@ export default function Start() {
     <FlatList
       data={gefiltert}
       keyExtractor={(f) => f.id}
-      contentContainerStyle={{ padding: abstand.l, paddingBottom: insets.bottom + 40 }}
+      contentContainerStyle={{ padding: abstand.l, paddingTop: insets.top + abstand.l, paddingBottom: insets.bottom + 40 }}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View>
@@ -43,6 +44,7 @@ export default function Start() {
                 <Text style={styles.heroTitel}>Fallbeispiel-Trainer</Text>
                 <Text style={styles.heroUnter}>Jugend-Einsatz-Team</Text>
               </View>
+              <MenueKnopf aufRot />
             </View>
             <Text style={styles.heroText}>
               Notfälle realistisch nachspielen, Vitalwerte ansagen und gemeinsam mit der Checkliste bewerten.

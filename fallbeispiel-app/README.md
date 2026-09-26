@@ -6,8 +6,9 @@ Zuschauer:innen **bewerten mit einer Checkliste**, was die Helfer:innen gemacht 
 
 ## Funktionen
 
-- **10 fertige Fallbeispiele** (CPR-Standardablauf, Ertrinkungsunfall, Reanimation, Unterzuckerung, starke Blutung,
-  Allergie, Wirbelsäule, Sonnenstich, Unterkühlung, Krampfanfall) – jeweils mit
+- **20 fertige Fallbeispiele** (CPR, Kinder-Reanimation, erschöpfter Schwimmer, Ertrinkungsunfall, Reanimation, Unterzuckerung, starke Blutung,
+  Allergie, Wirbelsäule, Sonnenstich, Unterkühlung, Krampfanfall, Asthma, Schlaganfall, Herzinfarkt, Unterarmbruch,
+  Verbrennung, Nasenbluten, Ohnmacht, Hyperventilation) – jeweils mit
   Lage zum Vorlesen, geheimer Mimen-Anleitung, Schminke/Requisiten, Vitalwerten und Checkliste.
 - **Patientenmonitor** mit Puls, SpO₂, Atemfrequenz, Blutdruck, Blutzucker, Temperatur,
   Bewusstsein, Haut und Pupillen. Werte außerhalb des Normbereichs werden rot markiert.

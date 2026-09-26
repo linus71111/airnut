@@ -16,14 +16,15 @@ export function ZurueckKnopf() {
       accessibilityLabel="Zurück"
       hitSlop={10}
       onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-      style={({ pressed }) => [styles.kopfKnopf, pressed && { opacity: 0.6 }]}>
-      <Text style={styles.zurueck}>‹ Zurück</Text>
+      style={({ pressed }) => [styles.zurueckKnopf, pressed && { opacity: 0.6 }]}>
+      <Text style={styles.zurueckPfeil}>‹</Text>
+      <Text style={styles.zurueck}>Zurück</Text>
     </Pressable>
   );
 }
 
-/** Burger-Menü (☰) mit allen Bereichen und den Akten der Helfer:innen */
-export function MenueKnopf() {
+/** Burger-Menü (☰) mit allen Bereichen und den Akten der Helfer:innen. `aufRot`: weiße Variante für rote Flächen */
+export function MenueKnopf({ aufRot }: { aufRot?: boolean }) {
   const styles = useStyles();
   const [offen, setOffen] = useState(false);
   const { personen, faelle } = useStore();
@@ -41,8 +42,12 @@ export function MenueKnopf() {
         accessibilityLabel="Menü öffnen"
         hitSlop={10}
         onPress={() => setOffen(true)}
-        style={({ pressed }) => [styles.kopfKnopf, pressed && { opacity: 0.6 }]}>
-        <Text style={styles.burger}>☰</Text>
+        style={({ pressed }) => [
+          styles.menueKnopf,
+          aufRot && { backgroundColor: 'rgba(255,255,255,0.18)', marginRight: 0 },
+          pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+        ]}>
+        <Text style={[styles.burger, aufRot && { color: '#fff' }]}>☰</Text>
       </Pressable>
 
       <Modal visible={offen} transparent animationType="fade" onRequestClose={() => setOffen(false)}>
@@ -96,9 +101,19 @@ function Eintrag({ text, onPress, eingerueckt }: { text: string; onPress: () => 
 }
 
 const useStyles = macheStile((farben) => ({
-  kopfKnopf: { paddingHorizontal: 8, paddingVertical: 4 },
-  zurueck: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  burger: { color: '#fff', fontSize: 26, fontWeight: '700' },
+  zurueckKnopf: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 6, paddingVertical: 4 },
+  zurueckPfeil: { color: farben.rot, fontSize: 30, fontWeight: '300', marginTop: -3 },
+  zurueck: { color: farben.rot, fontSize: 17, fontWeight: '700' },
+  menueKnopf: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: farben.tonal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  burger: { color: farben.rot, fontSize: 20, fontWeight: '800' },
   hintergrund: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'flex-end' },
   panel: {
     backgroundColor: farben.karte,
