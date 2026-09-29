@@ -6,12 +6,13 @@
 #  Extras gegenüber dem Original-Tutorial (alles auch mit Blöcken machbar):
 #   - Startbildschirm mit Anleitung
 #   - Figur bleibt im Bildschirm
-#   - 3 Leben + Geist, der dich verfolgt (Geister fliegen durch Wände!)
+#   - 3 Leben + Geist, der dich verfolgt (auch er kommt nicht durch Wände)
 #   - Sound + Effekte beim Pizza-Essen
 #   - Alle 5 Punkte: Level up (du und der Geist werden schneller,
 #     aber nur bis zu einer Höchstgeschwindigkeit)
 #   - Alle 10 Punkte: neue Welt - andere Farbe + neue Wände,
-#     durch die man nicht laufen kann
+#     durch die man nicht laufen kann. Wände halten Abstand zum Rand
+#     und zueinander, damit man immer überall durchkommt
 #   - Jede Pizza gibt Extra-Zeit, damit es nie unmöglich wird
 #   - Goldene Bonus-Pizza (3 Punkte + Zeit), verschwindet nach 3 Sekunden
 #   - Herz: gibt ein Extra-Leben, verschwindet nach 4 Sekunden
@@ -33,6 +34,9 @@ next_level_score = 5
 next_world_score = 10
 last_x = 80
 last_y = 60
+ghost_last_x = 150
+ghost_last_y = 110
+GAP = 22   # Mindestabstand von Wänden zum Rand und zu anderen Wänden
 MAX_SPEED = 160
 MAX_GHOST_SPEED = 70
 MAX_WALLS = 5
@@ -72,6 +76,29 @@ def touches_wall(s: Sprite):
         if s.overlaps_with(w):
             return True
     return False
+
+# Ist eine Wand zu nah an einer anderen Wand?
+def too_close(wall: Sprite):
+    for other in sprites.all_of_kind(SpriteKind.Wall):
+        if other != wall:
+            if wall.left < other.right + GAP and wall.right > other.left - GAP and wall.top < other.bottom + GAP and wall.bottom > other.top - GAP:
+                return True
+    return False
+
+# Setzt eine Wand an eine Stelle mit genug Abstand zum Rand
+def place_wall(wall: Sprite):
+    wall.set_position(randint(GAP + wall.width // 2, 160 - GAP - wall.width // 2), randint(GAP + wall.height // 2, 120 - GAP - wall.height // 2))
+
+# Bewegt ein Sprite aus der Wand zurück. Probiert erst nur waagrecht
+# bzw. nur senkrecht, damit man an der Wand entlangrutschen kann.
+def push_out_of_wall(s: Sprite, old_x: number, old_y: number):
+    new_x = s.x
+    new_y = s.y
+    s.set_position(new_x, old_y)
+    if touches_wall(s):
+        s.set_position(old_x, new_y)
+        if touches_wall(s):
+            s.set_position(old_x, old_y)
 
 # Setzt ein Sprite an eine zufällige Stelle, die nicht in einer Wand ist
 def place_free(s: Sprite):
@@ -143,12 +170,14 @@ def build_world():
         pic.fill(14)
         pic.draw_rect(0, 0, pic.width, pic.height, 12)
         wall = sprites.create(pic, SpriteKind.Wall)
-        wall.set_position(randint(20, 140), randint(20, 100))
-        # Nie direkt auf dem Spieler bauen
+        place_wall(wall)
+        # Nie auf Spieler oder Geist bauen, nie zu nah an anderen Wänden
         tries = 0
-        while wall.overlaps_with(player_sprite) and tries < 30:
-            wall.set_position(randint(20, 140), randint(20, 100))
+        while (wall.overlaps_with(player_sprite) or wall.overlaps_with(ghost) or too_close(wall)) and tries < 50:
+            place_wall(wall)
             tries += 1
+        if tries >= 50:
+            wall.destroy()   # kein Platz gefunden -> diese Wand weglassen
     place_free(pizza)
     music.power_up.play()
     player_sprite.say_text("Welt " + str(world + 1) + "!", 1500)
@@ -181,20 +210,22 @@ sprites.on_overlap(SpriteKind.player, SpriteKind.food, on_eat_pizza)
 
 # ---------- Wände: nicht durchlaufen ----------
 def on_update():
-    global last_x, last_y
-    # Letzte freie Position merken
-    if not touches_wall(player_sprite):
-        last_x = player_sprite.x
-        last_y = player_sprite.y
+    global last_x, last_y, ghost_last_x, ghost_last_y
+    # Spieler
+    if touches_wall(player_sprite):
+        push_out_of_wall(player_sprite, last_x, last_y)
+    last_x = player_sprite.x
+    last_y = player_sprite.y
+    # Geist
+    if touches_wall(ghost):
+        push_out_of_wall(ghost, ghost_last_x, ghost_last_y)
+    ghost_last_x = ghost.x
+    ghost_last_y = ghost.y
 game.on_update(on_update)
-
-def on_hit_wall(sprite, other_sprite):
-    # Zurück an die letzte freie Position
-    sprite.set_position(last_x, last_y)
-sprites.on_overlap(SpriteKind.player, SpriteKind.Wall, on_hit_wall)
 
 # ---------- Geist erwischt dich ----------
 def on_hit_ghost(sprite, other_sprite):
+    global ghost_last_x, ghost_last_y
     info.change_life_by(-1)
     music.zapped.play()
     scene.camera_shake(4, 500)
@@ -203,6 +234,9 @@ def on_hit_ghost(sprite, other_sprite):
         other_sprite.set_position(150, randint(10, 110))
     else:
         other_sprite.set_position(10, randint(10, 110))
+    # Am Rand stehen nie Wände, trotzdem neue Position merken
+    ghost_last_x = other_sprite.x
+    ghost_last_y = other_sprite.y
 sprites.on_overlap(SpriteKind.player, SpriteKind.enemy, on_hit_ghost)
 
 # ---------- Goldene Bonus-Pizza ----------
