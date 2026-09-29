@@ -16,9 +16,12 @@
 #   - Jede Pizza gibt Extra-Zeit, damit es nie unmöglich wird
 #   - Goldene Bonus-Pizza (3 Punkte + Zeit), verschwindet nach 3 Sekunden
 #   - Herz: gibt ein Extra-Leben, verschwindet nach 4 Sekunden
-#   - Schlamm: macht dich UND den Geist 3 Sekunden lang halb so schnell,
+#   - Schlamm: wer durchläuft (du oder der Geist), ist 3 Sekunden lang
+#     halb so schnell. Der Schlamm ist danach weg,
 #     verschwindet nach 5 Sekunden
 #   - Kamera wackelt, wenn der Geist dich erwischt
+#   - Bei 67 Punkten: Six-Seven-Party mit bunt blinkendem Hintergrund,
+#     Konfetti und +7 Sekunden
 # ============================================================
 
 @namespace
@@ -44,9 +47,14 @@ MAX_SPEED = 160
 MAX_GHOST_SPEED = 70
 MAX_WALLS = 5
 MAX_LIFE = 5
-slowed = False
-slow_until = 0
+player_slowed = False
+player_slow_until = 0
+ghost_slowed = False
+ghost_slow_until = 0
 SLOW_TIME = 3000   # so lange (in ms) macht Schlamm langsam
+party_done = False
+party_until = 0
+PARTY_SCORE = 67
 world_colors = [7, 9, 6, 13, 11, 3]
 
 # ---------- Start ----------
@@ -190,16 +198,28 @@ def build_world():
 
 # ---------- Geschwindigkeit setzen (halb so schnell im Schlamm) ----------
 def apply_speeds():
-    if slowed:
+    if player_slowed:
         controller.move_sprite(player_sprite, speed // 2, speed // 2)
-        ghost.follow(player_sprite, ghost_speed // 2)
     else:
         controller.move_sprite(player_sprite, speed, speed)
+    if ghost_slowed:
+        ghost.follow(player_sprite, ghost_speed // 2)
+    else:
         ghost.follow(player_sprite, ghost_speed)
 
 # ---------- Fortschritt prüfen (Level + Welt) ----------
 def check_progress():
     global level, world, speed, ghost_speed, next_level_score, next_world_score
+    global party_done, party_until
+    # 67 Punkte: Six-Seven-Party!
+    if info.score() >= PARTY_SCORE and not party_done:
+        party_done = True
+        party_until = game.runtime() + 6700
+        effects.confetti.start_screen_effect(6700)
+        music.power_up.play()
+        info.change_countdown_by(7)
+        player_sprite.say_text("SIX SEVEN!", 2000)
+        ghost.say_text("6 7!!", 2000)
     if info.score() >= next_level_score:
         next_level_score += 5
         level += 1
@@ -224,12 +244,15 @@ sprites.on_overlap(SpriteKind.player, SpriteKind.food, on_eat_pizza)
 
 # ---------- Wände: nicht durchlaufen ----------
 def on_update():
-    global last_x, last_y, ghost_last_x, ghost_last_y, slowed
+    global last_x, last_y, ghost_last_x, ghost_last_y, player_slowed, ghost_slowed
     # Schlamm-Zeit vorbei? -> wieder normal schnell
-    if slowed and game.runtime() > slow_until:
-        slowed = False
+    if player_slowed and game.runtime() > player_slow_until:
+        player_slowed = False
         apply_speeds()
         player_sprite.say_text("Wieder schnell!", 800)
+    if ghost_slowed and game.runtime() > ghost_slow_until:
+        ghost_slowed = False
+        apply_speeds()
     # Spieler
     if touches_wall(player_sprite):
         push_out_of_wall(player_sprite, last_x, last_y)
@@ -348,12 +371,33 @@ def on_spawn_mud():
     mud.lifespan = 5000
 game.on_update_interval(12000, on_spawn_mud)
 
-def on_step_in_mud(sprite, other_sprite):
-    global slowed, slow_until
-    slowed = True
-    slow_until = game.runtime() + SLOW_TIME
+# Spieler läuft durch Schlamm -> nur der Spieler wird langsam
+def on_player_in_mud(sprite, other_sprite):
+    global player_slowed, player_slow_until
+    player_slowed = True
+    player_slow_until = game.runtime() + SLOW_TIME
     apply_speeds()
     music.wawawawaa.play()
     other_sprite.destroy(effects.bubbles, 300)
     sprite.say_text("Schlamm!", 800)
-sprites.on_overlap(SpriteKind.player, SpriteKind.Mud, on_step_in_mud)
+sprites.on_overlap(SpriteKind.player, SpriteKind.Mud, on_player_in_mud)
+
+# Geist fliegt durch Schlamm -> nur der Geist wird langsam
+def on_ghost_in_mud(sprite, other_sprite):
+    global ghost_slowed, ghost_slow_until
+    ghost_slowed = True
+    ghost_slow_until = game.runtime() + SLOW_TIME
+    apply_speeds()
+    other_sprite.destroy(effects.bubbles, 300)
+    sprite.say_text("Iiih!", 800)
+sprites.on_overlap(SpriteKind.enemy, SpriteKind.Mud, on_ghost_in_mud)
+
+# ---------- 67-Party: bunter Hintergrund ----------
+def on_party_colors():
+    if party_done:
+        if game.runtime() < party_until:
+            scene.set_background_color(randint(1, 14))
+        elif game.runtime() < party_until + 200:
+            # Party vorbei -> wieder die Farbe der aktuellen Welt
+            scene.set_background_color(world_colors[world % len(world_colors)])
+game.on_update_interval(150, on_party_colors)
