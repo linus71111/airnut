@@ -16,6 +16,8 @@
 #   - Jede Pizza gibt Extra-Zeit, damit es nie unmöglich wird
 #   - Goldene Bonus-Pizza (3 Punkte + Zeit), verschwindet nach 3 Sekunden
 #   - Herz: gibt ein Extra-Leben, verschwindet nach 4 Sekunden
+#   - Schlamm: macht dich UND den Geist 3 Sekunden lang halb so schnell,
+#     verschwindet nach 5 Sekunden
 #   - Kamera wackelt, wenn der Geist dich erwischt
 # ============================================================
 
@@ -24,6 +26,7 @@ class SpriteKind:
     Bonus = SpriteKind.create()
     Wall = SpriteKind.create()
     Heart = SpriteKind.create()
+    Mud = SpriteKind.create()
 
 # ---------- Variablen ----------
 level = 1
@@ -41,6 +44,9 @@ MAX_SPEED = 160
 MAX_GHOST_SPEED = 70
 MAX_WALLS = 5
 MAX_LIFE = 5
+slowed = False
+slow_until = 0
+SLOW_TIME = 3000   # so lange (in ms) macht Schlamm langsam
 world_colors = [7, 9, 6, 13, 11, 3]
 
 # ---------- Start ----------
@@ -182,6 +188,15 @@ def build_world():
     music.power_up.play()
     player_sprite.say_text("Welt " + str(world + 1) + "!", 1500)
 
+# ---------- Geschwindigkeit setzen (halb so schnell im Schlamm) ----------
+def apply_speeds():
+    if slowed:
+        controller.move_sprite(player_sprite, speed // 2, speed // 2)
+        ghost.follow(player_sprite, ghost_speed // 2)
+    else:
+        controller.move_sprite(player_sprite, speed, speed)
+        ghost.follow(player_sprite, ghost_speed)
+
 # ---------- Fortschritt prüfen (Level + Welt) ----------
 def check_progress():
     global level, world, speed, ghost_speed, next_level_score, next_world_score
@@ -190,8 +205,7 @@ def check_progress():
         level += 1
         speed = Math.min(speed + 10, MAX_SPEED)
         ghost_speed = Math.min(ghost_speed + 5, MAX_GHOST_SPEED)
-        controller.move_sprite(player_sprite, speed, speed)
-        ghost.follow(player_sprite, ghost_speed)
+        apply_speeds()
         player_sprite.say_text("Level " + str(level) + "!", 1000)
     if info.score() >= next_world_score:
         next_world_score += 10
@@ -210,7 +224,12 @@ sprites.on_overlap(SpriteKind.player, SpriteKind.food, on_eat_pizza)
 
 # ---------- Wände: nicht durchlaufen ----------
 def on_update():
-    global last_x, last_y, ghost_last_x, ghost_last_y
+    global last_x, last_y, ghost_last_x, ghost_last_y, slowed
+    # Schlamm-Zeit vorbei? -> wieder normal schnell
+    if slowed and game.runtime() > slow_until:
+        slowed = False
+        apply_speeds()
+        player_sprite.say_text("Wieder schnell!", 800)
     # Spieler
     if touches_wall(player_sprite):
         push_out_of_wall(player_sprite, last_x, last_y)
@@ -304,3 +323,37 @@ def on_eat_heart(sprite, other_sprite):
     other_sprite.destroy(effects.hearts, 300)
     sprite.say_text("+1 Leben!", 800)
 sprites.on_overlap(SpriteKind.player, SpriteKind.Heart, on_eat_heart)
+
+# ---------- Schlamm: macht langsam ----------
+def on_spawn_mud():
+    mud = sprites.create(img("""
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . e e e e e e . . . . .
+        . . . e e e e e e e e e e . . .
+        . . e e e f e e e e e e e e . .
+        . e e e e e e e e e f e e e e .
+        . e e e e e e e f e e e e e e .
+        e e e f e e e e e e e e e f e e
+        e e e e e e e e e e e e e e e e
+        . e e e e e f e e e e e e e e .
+        . . e e e e e e e e e f e e . .
+        . . . e e e e e e e e e e . . .
+        . . . . . e e e e e e . . . . .
+        . . . . . . . . . . . . . . . .
+    """), SpriteKind.Mud)
+    place_free(mud)
+    mud.lifespan = 5000
+game.on_update_interval(12000, on_spawn_mud)
+
+def on_step_in_mud(sprite, other_sprite):
+    global slowed, slow_until
+    slowed = True
+    slow_until = game.runtime() + SLOW_TIME
+    apply_speeds()
+    music.wawawawaa.play()
+    other_sprite.destroy(effects.bubbles, 300)
+    sprite.say_text("Schlamm!", 800)
+sprites.on_overlap(SpriteKind.player, SpriteKind.Mud, on_step_in_mud)
