@@ -17,8 +17,8 @@
 #   - Goldene Bonus-Pizza (3 Punkte + Zeit), verschwindet nach 3 Sekunden
 #   - Herz: gibt ein Extra-Leben, verschwindet nach 4 Sekunden
 #   - Schlamm: wer durchläuft (du oder der Geist), ist 3 Sekunden lang
-#     halb so schnell. Der Schlamm ist danach weg,
-#     verschwindet nach 5 Sekunden
+#     halb so schnell. Danach ist der Schlamm weg. Wenn keiner
+#     durchläuft, verschwindet er nach 5 Sekunden
 #   - Kamera wackelt, wenn der Geist dich erwischt
 #   - Bei 67 Punkten: Six-Seven-Party mit bunt blinkendem Hintergrund,
 #     Konfetti und +7 Sekunden
