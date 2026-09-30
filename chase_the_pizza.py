@@ -22,6 +22,11 @@
 #   - Kamera wackelt, wenn der Geist dich erwischt
 #   - Bei 67 Punkten: Six-Seven-Party mit bunt blinkendem Hintergrund,
 #     Konfetti und +7 Sekunden
+#   - Skin-Auswahl am Anfang: 5 Skins, mit links/rechts wählen, A = OK
+#   - Alle 20 Punkte: BOSS-LEVEL! Ein großer Boss jagt dich, fliegt
+#     über Wände und schießt Feuerbälle (ab Boss 2 gleich drei auf
+#     einmal). Iss 5 Pizzas, um ihn zu besiegen. Jeder Boss ist
+#     schneller als der davor.
 # ============================================================
 
 @namespace
@@ -30,6 +35,7 @@ class SpriteKind:
     Wall = SpriteKind.create()
     Heart = SpriteKind.create()
     Mud = SpriteKind.create()
+    Boss = SpriteKind.create()
 
 # ---------- Variablen ----------
 level = 1
@@ -56,31 +62,159 @@ party_done = False
 party_until = 0
 PARTY_SCORE = 67
 world_colors = [7, 9, 6, 13, 11, 3]
+skin_index = 0
+choosing = True
+boss_active = False
+boss_count = 0
+boss_hits = 0
+BOSS_PIZZAS = 5          # so viele Pizzas muss man im Boss-Level essen
+next_boss_score = 20     # alle 20 Punkte kommt ein Boss
+boss: Sprite = None
 
 # ---------- Start ----------
 scene.set_background_color(7)
 game.splash("Chase the Pizza!", "Pfeiltasten: bewegen")
 game.splash("Iss Pizza, meide den Geist!", "Alle 10 Punkte: neue Wände")
+game.splash("Alle 20 Punkte: BOSS!", "Iss 5 Pizzas, um ihn zu besiegen")
+
+# ---------- Skins ----------
+skin_names = ["Klassiker", "Ninja", "Roboter", "Prinzessin", "Frosch"]
+skins = [
+    # 1: Klassiker
+    img("""
+        . . . . . f f f f f . . . . . .
+        . . . . f 2 2 2 2 2 f . . . . .
+        . . . f 2 2 2 2 2 2 2 f . . . .
+        . . . f f f d d d d f f . . . .
+        . . . f d f d d d f d f . . . .
+        . . . f d d d d d d d f . . . .
+        . . . . f d d 2 d d f . . . . .
+        . . . . . f f f f f . . . . . .
+        . . . . f 8 8 8 8 8 f . . . . .
+        . . . f d 8 8 8 8 8 d f . . . .
+        . . . f d 8 8 8 8 8 d f . . . .
+        . . . . f 8 8 8 8 8 f . . . . .
+        . . . . f 8 8 f 8 8 f . . . . .
+        . . . . f 8 8 f 8 8 f . . . . .
+        . . . . f e e f e e f . . . . .
+        . . . . f f f . f f f . . . . .
+    """),
+    # 2: Ninja
+    img("""
+        . . . . . f f f f f . . . . . .
+        . . . . f f f f f f f . . . . .
+        . . . f f f f f f f f f . . . .
+        . . . f f f d d d d f f . . . .
+        . . . f d f d d d f d f . . . .
+        . . . f d d d d d d d f . . . .
+        . . . . f d d 2 d d f . . . . .
+        . . . . . f f f f f . . . . . .
+        . . . . f f f f f f f . . . . .
+        . . . f d f f f f f d f . . . .
+        . . . f d f f f f f d f . . . .
+        . . . . f f f f f f f . . . . .
+        . . . . f f f f f f f . . . . .
+        . . . . f f f f f f f . . . . .
+        . . . . f e e f e e f . . . . .
+        . . . . f f f . f f f . . . . .
+    """),
+    # 3: Roboter
+    img("""
+        . . . . . f f f f f . . . . . .
+        . . . . f c c c c c f . . . . .
+        . . . f c c c c c c c f . . . .
+        . . . f f f 1 1 1 1 f f . . . .
+        . . . f 1 f 1 1 1 f 1 f . . . .
+        . . . f 1 1 1 1 1 1 1 f . . . .
+        . . . . f 1 1 2 1 1 f . . . . .
+        . . . . . f f f f f . . . . . .
+        . . . . f b b b b b f . . . . .
+        . . . f 1 b b b b b 1 f . . . .
+        . . . f 1 b b b b b 1 f . . . .
+        . . . . f b b b b b f . . . . .
+        . . . . f c c f c c f . . . . .
+        . . . . f c c f c c f . . . . .
+        . . . . f e e f e e f . . . . .
+        . . . . f f f . f f f . . . . .
+    """),
+    # 4: Prinzessin
+    img("""
+        . . . . . f f f f f . . . . . .
+        . . . . f 5 5 5 5 5 f . . . . .
+        . . . f 5 5 5 5 5 5 5 f . . . .
+        . . . f f f d d d d f f . . . .
+        . . . f d f d d d f d f . . . .
+        . . . f d d d d d d d f . . . .
+        . . . . f d d 2 d d f . . . . .
+        . . . . . f f f f f . . . . . .
+        . . . . f 3 3 3 3 3 f . . . . .
+        . . . f d 3 3 3 3 3 d f . . . .
+        . . . f d 3 3 3 3 3 d f . . . .
+        . . . . f 3 3 3 3 3 f . . . . .
+        . . . . f 3 3 f 3 3 f . . . . .
+        . . . . f 3 3 f 3 3 f . . . . .
+        . . . . f e e f e e f . . . . .
+        . . . . f f f . f f f . . . . .
+    """),
+    # 5: Frosch
+    img("""
+        . . . . . f f f f f . . . . . .
+        . . . . f 7 7 7 7 7 f . . . . .
+        . . . f 7 7 7 7 7 7 7 f . . . .
+        . . . f f f 7 7 7 7 f f . . . .
+        . . . f 7 f 7 7 7 f 7 f . . . .
+        . . . f 7 7 7 7 7 7 7 f . . . .
+        . . . . f 7 7 2 7 7 f . . . . .
+        . . . . . f f f f f . . . . . .
+        . . . . f 6 6 6 6 6 f . . . . .
+        . . . f 7 6 6 6 6 6 7 f . . . .
+        . . . f 7 6 6 6 6 6 7 f . . . .
+        . . . . f 6 6 6 6 6 f . . . . .
+        . . . . f 7 7 f 7 7 f . . . . .
+        . . . . f 7 7 f 7 7 f . . . . .
+        . . . . f e e f e e f . . . . .
+        . . . . f f f . f f f . . . . .
+    """)
+]
+
+# ---------- Skin-Auswahl ----------
+game.splash("Wähle deinen Skin!", "Links/Rechts wechseln, A = OK")
+preview = sprites.create(skins[0], SpriteKind.player)
+preview.scale = 3
+
+def show_skin():
+    preview.set_image(skins[skin_index])
+    preview.say_text("< " + str(skin_index + 1) + "/5 " + skin_names[skin_index] + " >")
+
+def on_left_pressed():
+    global skin_index
+    if choosing:
+        skin_index = (skin_index + 4) % 5
+        show_skin()
+controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
+
+def on_right_pressed():
+    global skin_index
+    if choosing:
+        skin_index = (skin_index + 1) % 5
+        show_skin()
+controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
+
+def on_a_pressed():
+    global choosing
+    if choosing:
+        choosing = False
+        music.ba_ding.play()
+controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
+
+show_skin()
+# Warten, bis A gedrückt wurde
+while choosing:
+    pause(20)
+preview.destroy()
 
 # ---------- Spieler ----------
-player_sprite = sprites.create(img("""
-    . . . . . f f f f f . . . . . .
-    . . . . f 2 2 2 2 2 f . . . . .
-    . . . f 2 2 2 2 2 2 2 f . . . .
-    . . . f f f d d d d f f . . . .
-    . . . f d f d d d f d f . . . .
-    . . . f d d d d d d d f . . . .
-    . . . . f d d 2 d d f . . . . .
-    . . . . . f f f f f . . . . . .
-    . . . . f 8 8 8 8 8 f . . . . .
-    . . . f d 8 8 8 8 8 d f . . . .
-    . . . f d 8 8 8 8 8 d f . . . .
-    . . . . f 8 8 8 8 8 f . . . . .
-    . . . . f 8 8 f 8 8 f . . . . .
-    . . . . f 8 8 f 8 8 f . . . . .
-    . . . . f e e f e e f . . . . .
-    . . . . f f f . f f f . . . . .
-"""), SpriteKind.player)
+player_sprite = sprites.create(skins[skin_index], SpriteKind.player)
 controller.move_sprite(player_sprite, speed, speed)
 player_sprite.set_stay_in_screen(True)
 
@@ -172,7 +306,8 @@ info.start_countdown(30)
 
 # ---------- Neue Welt: Farbe wechseln + Wände neu bauen ----------
 def build_world():
-    scene.set_background_color(world_colors[world % len(world_colors)])
+    if not boss_active:
+        scene.set_background_color(world_colors[world % len(world_colors)])
     for old in sprites.all_of_kind(SpriteKind.Wall):
         old.destroy()
     wall_count = Math.min(world, MAX_WALLS)
@@ -231,14 +366,103 @@ def check_progress():
         next_world_score += 10
         world += 1
         build_world()
+    if info.score() >= next_boss_score and not boss_active:
+        start_boss()
+
+# ---------- Boss-Level ----------
+def start_boss():
+    global boss, boss_active, boss_count, boss_hits, next_boss_score
+    boss_active = True
+    boss_count += 1
+    boss_hits = 0
+    next_boss_score += 20
+    scene.set_background_color(2)
+    scene.camera_shake(6, 1000)
+    music.power_down.play()
+    info.change_countdown_by(10)   # etwas Extra-Zeit für den Kampf
+    boss = sprites.create(img("""
+        . . f . . . . . . . . . . f . .
+        . f 2 f . . . . . . . . f 2 f .
+        . f 2 2 f f f f f f f f 2 2 f .
+        . . f 2 2 2 2 2 2 2 2 2 2 f . .
+        . f 2 2 2 2 2 2 2 2 2 2 2 2 f .
+        . f 2 5 5 2 2 2 2 2 2 5 5 2 f .
+        . f 2 5 f 5 2 2 2 2 5 f 5 2 f .
+        . f 2 2 5 5 2 2 2 2 5 5 2 2 f .
+        . f 2 2 2 2 2 2 2 2 2 2 2 2 f .
+        . f 2 2 f 1 f 1 f 1 f 1 f 2 f .
+        . f 2 2 f f f f f f f f f 2 f .
+        . f 2 2 2 2 2 2 2 2 2 2 2 2 f .
+        . f 2 2 2 2 2 2 2 2 2 2 2 2 f .
+        . f 2 f 2 2 f 2 2 f 2 2 f 2 f .
+        . f f . f f . f f . f f . f f .
+        . . . . . . . . . . . . . . . .
+    """), SpriteKind.Boss)
+    boss.scale = 2
+    # Boss erscheint auf der anderen Seite
+    if player_sprite.x < 80:
+        boss.set_position(140, 60)
+    else:
+        boss.set_position(20, 60)
+    # Jeder Boss ist schneller, aber nie schneller als 90
+    boss.follow(player_sprite, Math.min(40 + boss_count * 10, 90))
+    boss.say_text("0/" + str(BOSS_PIZZAS))
+    player_sprite.say_text("BOSS " + str(boss_count) + "! Iss " + str(BOSS_PIZZAS) + " Pizzas!", 2500)
+
+def defeat_boss():
+    global boss_active
+    boss_active = False
+    boss.destroy(effects.disintegrate, 500)
+    for p in sprites.all_of_kind(SpriteKind.projectile):
+        p.destroy()
+    scene.set_background_color(world_colors[world % len(world_colors)])
+    music.power_up.play()
+    effects.confetti.start_screen_effect(2000)
+    player_sprite.say_text("Boss besiegt!", 1500)
+    # Belohnung
+    info.change_score_by(5)
+    info.change_countdown_by(10)
+    if info.life() < MAX_LIFE:
+        info.change_life_by(1)
+
+# Boss schießt jede Sekunde Feuerbälle auf den Spieler
+def shoot(vx: number, vy: number):
+    sprites.create_projectile_from_sprite(img("""
+        . 4 4 .
+        4 5 5 4
+        4 5 5 4
+        . 4 4 .
+    """), boss, vx, vy)
+
+def on_boss_shoot():
+    if boss_active:
+        dx = player_sprite.x - boss.x
+        dy = player_sprite.y - boss.y
+        dist = Math.max(1, Math.sqrt(dx * dx + dy * dy))
+        shot_speed = Math.min(50 + boss_count * 15, 110)
+        vx = dx / dist * shot_speed
+        vy = dy / dist * shot_speed
+        shoot(vx, vy)
+        # Ab Boss 2: zusätzlich zwei schräge Schüsse
+        if boss_count >= 2:
+            shoot(vx - vy * 0.4, vy + vx * 0.4)
+            shoot(vx + vy * 0.4, vy - vx * 0.4)
+game.on_update_interval(1000, on_boss_shoot)
 
 # ---------- Pizza gegessen ----------
 def on_eat_pizza(sprite, other_sprite):
+    global boss_hits
     info.change_score_by(1)
     info.change_countdown_by(2)   # +2 Sekunden pro Pizza
     music.ba_ding.play()
     other_sprite.start_effect(effects.confetti, 300)
     place_free(other_sprite)
+    # Im Boss-Level zählt jede Pizza gegen den Boss
+    if boss_active:
+        boss_hits += 1
+        boss.say_text(str(boss_hits) + "/" + str(BOSS_PIZZAS))
+        if boss_hits >= BOSS_PIZZAS:
+            defeat_boss()
     check_progress()
 sprites.on_overlap(SpriteKind.player, SpriteKind.food, on_eat_pizza)
 
@@ -280,6 +504,31 @@ def on_hit_ghost(sprite, other_sprite):
     ghost_last_x = other_sprite.x
     ghost_last_y = other_sprite.y
 sprites.on_overlap(SpriteKind.player, SpriteKind.enemy, on_hit_ghost)
+
+# ---------- Boss erwischt dich ----------
+def on_hit_boss(sprite, other_sprite):
+    info.change_life_by(-1)
+    music.zapped.play()
+    scene.camera_shake(6, 500)
+    # Boss auf die andere Seite zurücksetzen
+    if sprite.x < 80:
+        other_sprite.set_position(140, randint(20, 100))
+    else:
+        other_sprite.set_position(20, randint(20, 100))
+sprites.on_overlap(SpriteKind.player, SpriteKind.Boss, on_hit_boss)
+
+# ---------- Feuerball trifft dich ----------
+def on_hit_fireball(sprite, other_sprite):
+    info.change_life_by(-1)
+    music.zapped.play()
+    scene.camera_shake(3, 300)
+    other_sprite.destroy()
+sprites.on_overlap(SpriteKind.player, SpriteKind.projectile, on_hit_fireball)
+
+# Feuerbälle bleiben an Wänden hängen -> Wände sind Deckung
+def on_fireball_wall(sprite, other_sprite):
+    sprite.destroy(effects.ashes, 100)
+sprites.on_overlap(SpriteKind.projectile, SpriteKind.Wall, on_fireball_wall)
 
 # ---------- Goldene Bonus-Pizza ----------
 def on_spawn_bonus():
@@ -398,6 +647,9 @@ def on_party_colors():
         if game.runtime() < party_until:
             scene.set_background_color(randint(1, 14))
         elif game.runtime() < party_until + 200:
-            # Party vorbei -> wieder die Farbe der aktuellen Welt
-            scene.set_background_color(world_colors[world % len(world_colors)])
+            # Party vorbei -> wieder die Farbe der aktuellen Welt (im Boss-Level rot)
+            if boss_active:
+                scene.set_background_color(2)
+            else:
+                scene.set_background_color(world_colors[world % len(world_colors)])
 game.on_update_interval(150, on_party_colors)
