@@ -22,11 +22,11 @@
 #   - Kamera wackelt, wenn der Geist dich erwischt
 #   - Bei 67 Punkten: Six-Seven-Party mit bunt blinkendem Hintergrund,
 #     Konfetti und +7 Sekunden
+#   - Schwierigkeit am Anfang: Leicht, Mittel oder Schwer
 #   - Skin-Auswahl am Anfang: 5 Skins, mit links/rechts wählen, A = OK
-#   - Alle 20 Punkte: BOSS-LEVEL! Ein großer Boss jagt dich, fliegt
-#     über Wände und schießt Feuerbälle (ab Boss 2 gleich drei auf
-#     einmal). Iss 5 Pizzas, um ihn zu besiegen. Jeder Boss ist
-#     schneller als der davor.
+#   - Alle 20 Punkte: BOSS-LEVEL! Ein großer Boss jagt dich und schießt
+#     Feuerbälle. Auch er kommt nicht durch Wände. Iss Pizzas, um ihn
+#     zu besiegen. Jeder Boss ist schneller als der davor.
 # ============================================================
 
 @namespace
@@ -41,7 +41,7 @@ class SpriteKind:
 level = 1
 world = 0
 speed = 100
-ghost_speed = 30
+ghost_speed = 25
 next_level_score = 5
 next_world_score = 10
 last_x = 80
@@ -50,7 +50,7 @@ ghost_last_x = 150
 ghost_last_y = 110
 GAP = 22   # Mindestabstand von Wänden zum Rand und zu anderen Wänden
 MAX_SPEED = 160
-MAX_GHOST_SPEED = 70
+MAX_GHOST_SPEED = 50
 MAX_WALLS = 5
 MAX_LIFE = 5
 player_slowed = False
@@ -64,10 +64,27 @@ PARTY_SCORE = 67
 world_colors = [7, 9, 6, 13, 11, 3]
 skin_index = 0
 choosing = True
+phase = 0                # 0 = Schwierigkeit wählen, 1 = Skin wählen
+difficulty = 1           # 0 = Leicht, 1 = Mittel, 2 = Schwer
+difficulty_names = ["Leicht", "Mittel", "Schwer"]
+# Werte je Schwierigkeit:     Leicht, Mittel, Schwer
+DIFF_GHOST_START =           [15,     20,     25]
+DIFF_GHOST_STEP =            [2,      3,      4]
+DIFF_GHOST_MAX =             [35,     45,     55]
+DIFF_LIVES =                 [5,      3,      3]
+DIFF_TIME =                  [40,     30,     25]
+DIFF_BOSS_PIZZAS =           [3,      4,      5]
+DIFF_BOSS_MAX_SPEED =        [40,     55,     70]
+DIFF_BOSS_SHOT_TICKS =       [4,      3,      2]   # x 0,5 s zwischen Schüssen
+DIFF_TRIPLE_FROM_BOSS =      [99,     3,      2]   # ab welchem Boss 3 Schüsse
+ghost_step = 3
+boss_shot_tick = 0
+boss_last_x = 0
+boss_last_y = 0
 boss_active = False
 boss_count = 0
 boss_hits = 0
-BOSS_PIZZAS = 5          # so viele Pizzas muss man im Boss-Level essen
+BOSS_PIZZAS = 5          # wird durch die Schwierigkeit gesetzt
 next_boss_score = 20     # alle 20 Punkte kommt ein Boss
 boss: Sprite = None
 
@@ -75,7 +92,7 @@ boss: Sprite = None
 scene.set_background_color(7)
 game.splash("Chase the Pizza!", "Pfeiltasten: bewegen")
 game.splash("Iss Pizza, meide den Geist!", "Alle 10 Punkte: neue Wände")
-game.splash("Alle 20 Punkte: BOSS!", "Iss 5 Pizzas, um ihn zu besiegen")
+game.splash("Alle 20 Punkte: BOSS!", "Iss Pizzas, um ihn zu besiegen")
 
 # ---------- Skins ----------
 skin_names = ["Klassiker", "Ninja", "Roboter", "Prinzessin", "Frosch"]
@@ -177,41 +194,68 @@ skins = [
     """)
 ]
 
-# ---------- Skin-Auswahl ----------
-game.splash("Wähle deinen Skin!", "Links/Rechts wechseln, A = OK")
+# ---------- Auswahl: erst Schwierigkeit, dann Skin ----------
+game.splash("Wähle die Schwierigkeit!", "Links/Rechts wechseln, A = OK")
 preview = sprites.create(skins[0], SpriteKind.player)
 preview.scale = 3
+
+def show_difficulty():
+    preview.say_text("< " + difficulty_names[difficulty] + " >")
 
 def show_skin():
     preview.set_image(skins[skin_index])
     preview.say_text("< " + str(skin_index + 1) + "/5 " + skin_names[skin_index] + " >")
 
 def on_left_pressed():
-    global skin_index
+    global skin_index, difficulty
     if choosing:
-        skin_index = (skin_index + 4) % 5
-        show_skin()
+        if phase == 0:
+            difficulty = (difficulty + 2) % 3
+            show_difficulty()
+        else:
+            skin_index = (skin_index + 4) % 5
+            show_skin()
 controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
 
 def on_right_pressed():
-    global skin_index
+    global skin_index, difficulty
     if choosing:
-        skin_index = (skin_index + 1) % 5
-        show_skin()
+        if phase == 0:
+            difficulty = (difficulty + 1) % 3
+            show_difficulty()
+        else:
+            skin_index = (skin_index + 1) % 5
+            show_skin()
 controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
 
 def on_a_pressed():
-    global choosing
+    global phase, choosing
     if choosing:
-        choosing = False
         music.ba_ding.play()
+        if phase == 0:
+            phase = 1
+        else:
+            choosing = False
 controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
 
+# Schwierigkeit wählen
+show_difficulty()
+while phase == 0:
+    pause(20)
+
+# Skin wählen
+preview.say_text("")
+game.splash("Wähle deinen Skin!", "Links/Rechts wechseln, A = OK")
 show_skin()
-# Warten, bis A gedrückt wurde
 while choosing:
     pause(20)
 preview.destroy()
+
+# Werte der gewählten Schwierigkeit übernehmen
+ghost_speed = DIFF_GHOST_START[difficulty]
+ghost_step = DIFF_GHOST_STEP[difficulty]
+MAX_GHOST_SPEED = DIFF_GHOST_MAX[difficulty]
+BOSS_PIZZAS = DIFF_BOSS_PIZZAS[difficulty]
 
 # ---------- Spieler ----------
 player_sprite = sprites.create(skins[skin_index], SpriteKind.player)
@@ -301,8 +345,8 @@ ghost.follow(player_sprite, ghost_speed)
 
 # ---------- Punkte, Leben, Zeit ----------
 info.set_score(0)
-info.set_life(3)
-info.start_countdown(30)
+info.set_life(DIFF_LIVES[difficulty])
+info.start_countdown(DIFF_TIME[difficulty])
 
 # ---------- Neue Welt: Farbe wechseln + Wände neu bauen ----------
 def build_world():
@@ -359,7 +403,7 @@ def check_progress():
         next_level_score += 5
         level += 1
         speed = Math.min(speed + 10, MAX_SPEED)
-        ghost_speed = Math.min(ghost_speed + 5, MAX_GHOST_SPEED)
+        ghost_speed = Math.min(ghost_speed + ghost_step, MAX_GHOST_SPEED)
         apply_speeds()
         player_sprite.say_text("Level " + str(level) + "!", 1000)
     if info.score() >= next_world_score:
@@ -399,15 +443,27 @@ def start_boss():
         . . . . . . . . . . . . . . . .
     """), SpriteKind.Boss)
     boss.scale = 2
-    # Boss erscheint auf der anderen Seite
-    if player_sprite.x < 80:
-        boss.set_position(140, 60)
-    else:
-        boss.set_position(20, 60)
-    # Jeder Boss ist schneller, aber nie schneller als 90
-    boss.follow(player_sprite, Math.min(40 + boss_count * 10, 90))
+    # Boss erscheint auf der anderen Seite, nicht in einer Wand
+    place_boss_far(boss)
+    # Jeder Boss ist schneller, aber nie schneller als die Grenze
+    boss.follow(player_sprite, Math.min(20 + boss_count * 10, DIFF_BOSS_MAX_SPEED[difficulty]))
     boss.say_text("0/" + str(BOSS_PIZZAS))
     player_sprite.say_text("BOSS " + str(boss_count) + "! Iss " + str(BOSS_PIZZAS) + " Pizzas!", 2500)
+
+# Setzt den Boss auf die Seite, die weit weg vom Spieler ist
+def place_boss_far(b: Sprite):
+    global boss_last_x, boss_last_y
+    if player_sprite.x < 80:
+        x = 140
+    else:
+        x = 20
+    b.set_position(x, randint(20, 100))
+    tries = 0
+    while touches_wall(b) and tries < 30:
+        b.set_position(x, randint(20, 100))
+        tries += 1
+    boss_last_x = b.x
+    boss_last_y = b.y
 
 def defeat_boss():
     global boss_active
@@ -435,19 +491,23 @@ def shoot(vx: number, vy: number):
     """), boss, vx, vy)
 
 def on_boss_shoot():
+    global boss_shot_tick
     if boss_active:
+        boss_shot_tick += 1
+        if boss_shot_tick % DIFF_BOSS_SHOT_TICKS[difficulty] != 0:
+            return
         dx = player_sprite.x - boss.x
         dy = player_sprite.y - boss.y
         dist = Math.max(1, Math.sqrt(dx * dx + dy * dy))
-        shot_speed = Math.min(50 + boss_count * 15, 110)
+        shot_speed = Math.min(40 + boss_count * 10, 60 + difficulty * 20)
         vx = dx / dist * shot_speed
         vy = dy / dist * shot_speed
         shoot(vx, vy)
-        # Ab Boss 2: zusätzlich zwei schräge Schüsse
-        if boss_count >= 2:
+        # Ab einem bestimmten Boss: zusätzlich zwei schräge Schüsse
+        if boss_count >= DIFF_TRIPLE_FROM_BOSS[difficulty]:
             shoot(vx - vy * 0.4, vy + vx * 0.4)
             shoot(vx + vy * 0.4, vy - vx * 0.4)
-game.on_update_interval(1000, on_boss_shoot)
+game.on_update_interval(500, on_boss_shoot)
 
 # ---------- Pizza gegessen ----------
 def on_eat_pizza(sprite, other_sprite):
@@ -469,6 +529,7 @@ sprites.on_overlap(SpriteKind.player, SpriteKind.food, on_eat_pizza)
 # ---------- Wände: nicht durchlaufen ----------
 def on_update():
     global last_x, last_y, ghost_last_x, ghost_last_y, player_slowed, ghost_slowed
+    global boss_last_x, boss_last_y
     # Schlamm-Zeit vorbei? -> wieder normal schnell
     if player_slowed and game.runtime() > player_slow_until:
         player_slowed = False
@@ -487,6 +548,12 @@ def on_update():
         push_out_of_wall(ghost, ghost_last_x, ghost_last_y)
     ghost_last_x = ghost.x
     ghost_last_y = ghost.y
+    # Boss
+    if boss_active:
+        if touches_wall(boss):
+            push_out_of_wall(boss, boss_last_x, boss_last_y)
+        boss_last_x = boss.x
+        boss_last_y = boss.y
 game.on_update(on_update)
 
 # ---------- Geist erwischt dich ----------
@@ -511,10 +578,7 @@ def on_hit_boss(sprite, other_sprite):
     music.zapped.play()
     scene.camera_shake(6, 500)
     # Boss auf die andere Seite zurücksetzen
-    if sprite.x < 80:
-        other_sprite.set_position(140, randint(20, 100))
-    else:
-        other_sprite.set_position(20, randint(20, 100))
+    place_boss_far(other_sprite)
 sprites.on_overlap(SpriteKind.player, SpriteKind.Boss, on_hit_boss)
 
 # ---------- Feuerball trifft dich ----------
